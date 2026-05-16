@@ -1,0 +1,51 @@
+{
+  "irVersion": "1.0",
+  "project": "outlook-pst-go",
+  "repository": "https://github.com/grokify/outlook-pst-go",
+  "versioning": "semver",
+  "commitConvention": "conventional",
+  "maintainers": ["grokify"],
+  "releases": [
+    {
+      "version": "v0.1.0",
+      "date": "2026-05-16",
+      "commit": "3fc5c26",
+      "highlights": [
+        { "description": "Pure Go library for reading and writing Microsoft Outlook PST files" },
+        { "description": "Full support for both ANSI and Unicode PST formats" },
+        { "description": "Transaction-safe write operations with two-phase commit" }
+      ],
+      "added": [
+        { "description": "Primitive types for PST parsing: NodeID, BlockID, HeapID, PropID, GUID", "commit": "20dc5e4" },
+        { "description": "Disk layer: header parsing, page/block structures, CRC computation, encryption/decryption", "commit": "13d970b" },
+        { "description": "NDB layer: node database with NBT/BBT B-tree search, node data reading, subnode support", "commit": "74b938a" },
+        { "description": "LTP layer: Heap-on-Node, BTree-on-Heap, Property Context, Table Context, named properties", "commit": "fbe6445" },
+        { "description": "RTF decompression using LZFu algorithm for compressed message bodies", "commit": "1188586" },
+        { "description": "Messaging layer: PST, Folder, Message, Attachment, Recipient types with lazy loading", "commit": "76f57ca" },
+        { "description": "Search folder support for virtual folders with search criteria", "commit": "76f57ca" },
+        { "description": "Disk layer write support: allocation maps, header/page/block serialization", "commit": "e118f51" },
+        { "description": "NDB layer write support: B-tree modifications, node creation/deletion", "commit": "4dd6b53" },
+        { "description": "Transaction system with two-phase commit and crash recovery", "commit": "4dd6b53" },
+        { "description": "LTP layer write support: heap allocation, BTH modifications, property bag updates", "commit": "6a6a8f1" },
+        { "description": "Messaging layer write support: PST creation, folder operations, MessageBuilder API", "commit": "65f7cf3" },
+        { "description": "`pstinfo` CLI tool for inspecting PST file contents", "commit": "3739ab6" },
+        { "description": "Go 1.23+ iterator support for idiomatic folder and message iteration", "commit": "76f57ca" }
+      ],
+      "documentation": [
+        { "description": "Comprehensive documentation: getting started, user guides, architecture, API reference", "commit": "7342299" },
+        { "description": "MS-PST specification mapping with inline code references", "commit": "7342299" },
+        { "description": "Case study documenting implementation lessons and debugging techniques", "commit": "7342299" },
+        { "description": "README with features, quick start, and API examples", "commit": "3fc5c26" }
+      ],
+      "tests": [
+        { "description": "Unit tests for disk layer CRC computation and encryption", "commit": "13d970b" },
+        { "description": "Unit tests for LTP property types and GUID parsing", "commit": "fbe6445" },
+        { "description": "Unit tests for RTF decompression", "commit": "1188586" },
+        { "description": "Sample PST file for integration testing", "commit": "bbd7c25" }
+      ],
+      "build": [
+        { "description": "Go module definition requiring Go 1.23+ for iter.Seq2 support", "commit": "598b981" }
+      ]
+    }
+  ]
+}
