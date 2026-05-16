@@ -14,10 +14,10 @@ const (
 	ErrKindUnknown NDBErrorKind = iota
 
 	// Node errors
-	ErrKindInvalidNodeIDType   // Invalid NID_TYPE value
-	ErrKindInvalidNodeIndex    // Invalid nidIndex value
-	ErrKindNodeNotFound        // Node not found in NBT
-	ErrKindInvalidNodeData     // Node data is corrupted
+	ErrKindInvalidNodeIDType // Invalid NID_TYPE value
+	ErrKindInvalidNodeIndex  // Invalid nidIndex value
+	ErrKindNodeNotFound      // Node not found in NBT
+	ErrKindInvalidNodeData   // Node data is corrupted
 
 	// Block errors
 	ErrKindBlockNotFound       // Block not found in BBT

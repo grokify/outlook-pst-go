@@ -140,7 +140,7 @@ func (db *Database) CryptMethod() disk.CryptMethod {
 // readPage reads a page from the file at the given offset.
 func (db *Database) readPage(offset uint64) ([]byte, error) {
 	buf := make([]byte, disk.PageSize)
-	n, err := db.file.ReadAt(buf, int64(offset))
+	n, err := db.file.ReadAt(buf, int64(offset)) //nolint:gosec // G115: PST file size bounded by format
 	if err != nil && err != io.EOF {
 		return nil, fmt.Errorf("failed to read page at offset %d: %w", offset, err)
 	}
@@ -223,6 +223,7 @@ func (db *Database) searchNBT(page *disk.BTPage, nid uint64) (*NodeInfo, error) 
 		// Binary search in leaf entries
 		for _, entry := range page.NBTEntries {
 			if entry.NID == nid {
+				//nolint:gosec // G115: NID is 32-bit per MS-PST spec
 				return &NodeInfo{
 					NID:       util.NodeID(entry.NID),
 					DataBID:   util.BlockID(entry.DataBID),
@@ -367,11 +368,11 @@ func (db *Database) ReadBlockDataFromInfo(info *BlockInfo) ([]byte, error) {
 
 	// Read block from disk
 	buf := make([]byte, totalSize)
-	n, err := db.file.ReadAt(buf, int64(info.Location))
+	n, err := db.file.ReadAt(buf, int64(info.Location)) //nolint:gosec // G115: PST file size bounded by format
 	if err != nil && err != io.EOF {
 		return nil, fmt.Errorf("failed to read block at offset %d: %w", info.Location, err)
 	}
-	if n < int(totalSize) {
+	if n < int(totalSize) { //nolint:gosec // G115: totalSize bounded by block size limit
 		return nil, fmt.Errorf("incomplete block read: got %d bytes, expected %d", n, totalSize)
 	}
 
@@ -479,7 +480,7 @@ func (db *Database) WritePage(offset uint64, data []byte) error {
 		return fmt.Errorf("invalid page size: got %d, expected %d", len(data), disk.PageSize)
 	}
 
-	n, err := db.file.WriteAt(data, int64(offset))
+	n, err := db.file.WriteAt(data, int64(offset)) //nolint:gosec // G115: PST file size bounded by format
 	if err != nil {
 		return fmt.Errorf("failed to write page at offset %d: %w", offset, err)
 	}
@@ -497,7 +498,7 @@ func (db *Database) WriteBlock(offset uint64, data []byte) error {
 		return fmt.Errorf("database is read-only")
 	}
 
-	n, err := db.file.WriteAt(data, int64(offset))
+	n, err := db.file.WriteAt(data, int64(offset)) //nolint:gosec // G115: PST file size bounded by format
 	if err != nil {
 		return fmt.Errorf("failed to write block at offset %d: %w", offset, err)
 	}

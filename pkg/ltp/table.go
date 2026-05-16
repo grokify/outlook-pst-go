@@ -251,7 +251,7 @@ func (t *Table) getRow(rowID, rowIndex uint32) (*TableRow, error) {
 
 	if t.rowMatrixNode != nil {
 		// Read from subnode
-		rowData, err = t.rowMatrixNode.Read(uint64(offset), uint64(rowSize))
+		rowData, err = t.rowMatrixNode.Read(uint64(offset), uint64(rowSize)) //nolint:gosec // G115: offset from row index * row size, bounded
 	} else if t.rowMatrix != nil {
 		// Read from heap data
 		if offset+rowSize > len(t.rowMatrix) {
@@ -352,7 +352,7 @@ func (r *TableRow) GetInt32(propID PropID) (int32, error) {
 	if len(data) < 4 {
 		return 0, fmt.Errorf("insufficient data for int32")
 	}
-	return int32(binary.LittleEndian.Uint32(data)), nil
+	return int32(binary.LittleEndian.Uint32(data)), nil //nolint:gosec // G115: binary reinterpretation, same bit width
 }
 
 // GetInt64 reads an int64 value.
@@ -364,7 +364,7 @@ func (r *TableRow) GetInt64(propID PropID) (int64, error) {
 	if len(data) < 8 {
 		return 0, fmt.Errorf("insufficient data for int64")
 	}
-	return int64(binary.LittleEndian.Uint64(data)), nil
+	return int64(binary.LittleEndian.Uint64(data)), nil //nolint:gosec // G115: binary format reinterpretation
 }
 
 // GetHNID reads an HNID value (for variable-length properties).

@@ -84,19 +84,19 @@ func (nid NodeID) Index() uint32 {
 // Predefined (special) node IDs.
 // See [MS-PST] Section 2.4.1 - Special Internal NIDs.
 var (
-	NIDMessageStore      = MakeNID(NIDTypeInternal, 0x1)             // NID_MESSAGE_STORE - Message store (NID 0x21). See [MS-PST] Section 2.4.3.
-	NIDNameIDMap         = MakeNID(NIDTypeInternal, 0x3)             // NID_NAME_TO_ID_MAP - Named property map (NID 0x61). See [MS-PST] Section 2.4.7.
-	NIDNameToIDMap       = NIDNameIDMap                              // Alias for named property map
-	NIDRootFolder        = NodeID(0x122)                             // NID_ROOT_FOLDER - Root folder. See [MS-PST] Section 2.4.4.1.
-	NIDSearchFolder      = NodeID(0x123)                             // Search folder root
-	NIDSearchUpdateQueue = MakeNID(NIDTypeSearchUpdateQueue, 0x1)    // NID_SEARCH_MANAGEMENT_QUEUE (NID 0xC1). See [MS-PST] Section 2.4.8.6.
+	NIDMessageStore      = MakeNID(NIDTypeInternal, 0x1)          // NID_MESSAGE_STORE - Message store (NID 0x21). See [MS-PST] Section 2.4.3.
+	NIDNameIDMap         = MakeNID(NIDTypeInternal, 0x3)          // NID_NAME_TO_ID_MAP - Named property map (NID 0x61). See [MS-PST] Section 2.4.7.
+	NIDNameToIDMap       = NIDNameIDMap                           // Alias for named property map
+	NIDRootFolder        = NodeID(0x122)                          // NID_ROOT_FOLDER - Root folder. See [MS-PST] Section 2.4.4.1.
+	NIDSearchFolder      = NodeID(0x123)                          // Search folder root
+	NIDSearchUpdateQueue = MakeNID(NIDTypeSearchUpdateQueue, 0x1) // NID_SEARCH_MANAGEMENT_QUEUE (NID 0xC1). See [MS-PST] Section 2.4.8.6.
 )
 
 // BlockID flag constants.
 const (
-	BlockIDAttachedBit  BlockID = 0x1 // Block is attached (in memory)
-	BlockIDInternalBit  BlockID = 0x2 // Block is internal (extended/subnode)
-	BlockIDIncrement    BlockID = 0x4 // Counter increment per block
+	BlockIDAttachedBit BlockID = 0x1 // Block is attached (in memory)
+	BlockIDInternalBit BlockID = 0x2 // Block is internal (extended/subnode)
+	BlockIDIncrement   BlockID = 0x4 // Counter increment per block
 )
 
 // IsInternal returns true if the block ID refers to an internal block.

@@ -155,7 +155,7 @@ func (pb *PropertyBag) GetInt16(id PropID) (int16, error) {
 	if len(data) < 2 {
 		return 0, fmt.Errorf("property 0x%04X: insufficient data for int16", id)
 	}
-	return int16(binary.LittleEndian.Uint16(data)), nil
+	return int16(binary.LittleEndian.Uint16(data)), nil //nolint:gosec // G115: binary format reinterpretation, same bit width
 }
 
 // GetInt32 reads an int32 property.
@@ -167,7 +167,7 @@ func (pb *PropertyBag) GetInt32(id PropID) (int32, error) {
 	if len(data) < 4 {
 		return 0, fmt.Errorf("property 0x%04X: insufficient data for int32", id)
 	}
-	return int32(binary.LittleEndian.Uint32(data)), nil
+	return int32(binary.LittleEndian.Uint32(data)), nil //nolint:gosec // G115: binary format reinterpretation, same bit width
 }
 
 // GetInt64 reads an int64 property.
@@ -179,7 +179,7 @@ func (pb *PropertyBag) GetInt64(id PropID) (int64, error) {
 	if len(data) < 8 {
 		return 0, fmt.Errorf("property 0x%04X: insufficient data for int64", id)
 	}
-	return int64(binary.LittleEndian.Uint64(data)), nil
+	return int64(binary.LittleEndian.Uint64(data)), nil //nolint:gosec // G115: binary format reinterpretation
 }
 
 // GetBool reads a boolean property.
@@ -305,7 +305,7 @@ func (pb *PropertyBag) GetCurrency(id PropID) (int64, error) {
 	if len(data) < 8 {
 		return 0, fmt.Errorf("property 0x%04X: insufficient data for currency", id)
 	}
-	return int64(binary.LittleEndian.Uint64(data)), nil
+	return int64(binary.LittleEndian.Uint64(data)), nil //nolint:gosec // G115: binary format reinterpretation
 }
 
 // GetGUID reads a GUID property.
@@ -404,6 +404,8 @@ func (pb *PropertyBag) parseMultiValueStrings(data []byte, propType PropType) ([
 }
 
 // GetInt32Slice reads a multi-value int32 property.
+//
+//nolint:dupl // Type-specific multi-value reader pattern, not duplicate code
 func (pb *PropertyBag) GetInt32Slice(id PropID) ([]int32, error) {
 	entry, err := pb.GetPropertyEntry(id)
 	if err != nil {
@@ -431,13 +433,15 @@ func (pb *PropertyBag) GetInt32Slice(id PropID) ([]int32, error) {
 
 	results := make([]int32, count)
 	for i := 0; i < count; i++ {
-		results[i] = int32(binary.LittleEndian.Uint32(data[4+i*4:]))
+		results[i] = int32(binary.LittleEndian.Uint32(data[4+i*4:])) //nolint:gosec // G115: binary format reinterpretation
 	}
 
 	return results, nil
 }
 
 // GetInt64Slice reads a multi-value int64 property.
+//
+//nolint:dupl // Type-specific multi-value reader pattern, not duplicate code
 func (pb *PropertyBag) GetInt64Slice(id PropID) ([]int64, error) {
 	entry, err := pb.GetPropertyEntry(id)
 	if err != nil {
@@ -465,7 +469,7 @@ func (pb *PropertyBag) GetInt64Slice(id PropID) ([]int64, error) {
 
 	results := make([]int64, count)
 	for i := 0; i < count; i++ {
-		results[i] = int64(binary.LittleEndian.Uint64(data[4+i*8:]))
+		results[i] = int64(binary.LittleEndian.Uint64(data[4+i*8:])) //nolint:gosec // G115: binary format reinterpretation
 	}
 
 	return results, nil

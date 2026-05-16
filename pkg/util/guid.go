@@ -8,10 +8,10 @@ import (
 // GUID represents a 128-bit globally unique identifier.
 // Uses the Windows GUID structure layout.
 type GUID struct {
-	Data1 uint32   // First 4 bytes (little-endian)
-	Data2 uint16   // Next 2 bytes (little-endian)
-	Data3 uint16   // Next 2 bytes (little-endian)
-	Data4 [8]byte  // Last 8 bytes (big-endian/sequential)
+	Data1 uint32  // First 4 bytes (little-endian)
+	Data2 uint16  // Next 2 bytes (little-endian)
+	Data3 uint16  // Next 2 bytes (little-endian)
+	Data4 [8]byte // Last 8 bytes (big-endian/sequential)
 }
 
 // GUIDSize is the size of a GUID in bytes.

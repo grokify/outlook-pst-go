@@ -284,6 +284,7 @@ func (n *Node) searchSubnode(block *disk.SubnodeBlock, nid uint64) (*NodeInfo, e
 	if block.IsLeaf() {
 		for _, entry := range block.LeafEntries {
 			if entry.NID == nid {
+				//nolint:gosec // G115: NID is 32-bit per MS-PST spec
 				return &NodeInfo{
 					NID:     util.NodeID(entry.NID),
 					DataBID: util.BlockID(entry.DataBID),
@@ -343,7 +344,7 @@ func (n *Node) iterateSubnodes(block *disk.SubnodeBlock, yield func(*Node, error
 	if block.IsLeaf() {
 		for _, entry := range block.LeafEntries {
 			info := &NodeInfo{
-				NID:     util.NodeID(entry.NID),
+				NID:     util.NodeID(entry.NID), //nolint:gosec // G115: NID is always 32-bit, stored in 64-bit for alignment
 				DataBID: util.BlockID(entry.DataBID),
 				SubBID:  util.BlockID(entry.SubBID),
 			}
@@ -405,7 +406,7 @@ func (r *NodeReader) Read(p []byte) (int, error) {
 	}
 
 	n := copy(p, data)
-	r.offset += uint64(n)
+	r.offset += uint64(n) //nolint:gosec // G115: n bounded by slice size
 
 	if n == 0 {
 		return 0, io.EOF
@@ -426,9 +427,9 @@ func (r *NodeReader) Seek(offset int64, whence int) (int64, error) {
 	case io.SeekStart:
 		newOffset = offset
 	case io.SeekCurrent:
-		newOffset = int64(r.offset) + offset
+		newOffset = int64(r.offset) + offset //nolint:gosec // G115: offset bounded by node data size
 	case io.SeekEnd:
-		newOffset = int64(size) + offset
+		newOffset = int64(size) + offset //nolint:gosec // G115: size bounded by node data size
 	default:
 		return 0, fmt.Errorf("invalid whence: %d", whence)
 	}

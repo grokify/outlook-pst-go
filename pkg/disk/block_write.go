@@ -70,7 +70,7 @@ func BuildBlock(data []byte, bid uint64, offset uint64, format PSTFormat, crypt 
 		// dwCRC: 8-12 (4 bytes)
 		binary.LittleEndian.PutUint16(trailer[0:2], uint16(dataSize))
 		binary.LittleEndian.PutUint16(trailer[2:4], sig)
-		binary.LittleEndian.PutUint32(trailer[4:8], uint32(bid))
+		binary.LittleEndian.PutUint32(trailer[4:8], uint32(bid)) //nolint:gosec // G115: ANSI format BID is 32-bit per MS-PST spec
 		binary.LittleEndian.PutUint32(trailer[8:12], crc)
 	}
 
@@ -87,7 +87,7 @@ func EncryptBlock(data []byte, method CryptMethod, blockID uint64) []byte {
 	case CryptMethodPermute:
 		return PermuteEncode(data)
 	case CryptMethodCyclic:
-		key := uint32(blockID)
+		key := uint32(blockID) //nolint:gosec // G115: cyclic encryption uses 32-bit key by design
 		return CyclicEncode(data, key)
 	default:
 		result := make([]byte, len(data))
@@ -124,10 +124,10 @@ func BuildExtendedBlock(level byte, bids []uint64, totalSize uint32, bid uint64,
 
 	// Build data portion
 	data := make([]byte, dataSize)
-	data[0] = byte(BlockTypeExtended) // btype = 0x01
-	data[1] = level                   // cLevel
-	binary.LittleEndian.PutUint16(data[2:4], uint16(len(bids))) // cEnt
-	binary.LittleEndian.PutUint32(data[4:8], totalSize)          // lcbTotal
+	data[0] = byte(BlockTypeExtended)                           // btype = 0x01
+	data[1] = level                                             // cLevel
+	binary.LittleEndian.PutUint16(data[2:4], uint16(len(bids))) //nolint:gosec // G115: entry count bounded by MaxXBlockEntries
+	binary.LittleEndian.PutUint32(data[4:8], totalSize)         // lcbTotal
 
 	// Write BID array
 	offset_pos := 8
@@ -135,7 +135,7 @@ func BuildExtendedBlock(level byte, bids []uint64, totalSize uint32, bid uint64,
 		if format == FormatUnicode {
 			binary.LittleEndian.PutUint64(data[offset_pos:offset_pos+8], refBID)
 		} else {
-			binary.LittleEndian.PutUint32(data[offset_pos:offset_pos+4], uint32(refBID))
+			binary.LittleEndian.PutUint32(data[offset_pos:offset_pos+4], uint32(refBID)) //nolint:gosec // G115: ANSI format BID is 32-bit
 		}
 		offset_pos += bidSize
 	}
@@ -170,9 +170,9 @@ func BuildSubnodeLeafBlock(entries []SubnodeLeafEntry, bid uint64, offset uint64
 
 	// Build data
 	data := make([]byte, dataSize)
-	data[0] = byte(BlockTypeSubnode) // btype = 0x02
-	data[1] = 0                      // cLevel = 0 (leaf)
-	binary.LittleEndian.PutUint16(data[2:4], uint16(len(entries))) // cEnt
+	data[0] = byte(BlockTypeSubnode)                               // btype = 0x02
+	data[1] = 0                                                    // cLevel = 0 (leaf)
+	binary.LittleEndian.PutUint16(data[2:4], uint16(len(entries))) //nolint:gosec // G115: entry count bounded by block capacity
 
 	// Write entries
 	pos := headerSize
@@ -182,9 +182,10 @@ func BuildSubnodeLeafBlock(entries []SubnodeLeafEntry, bid uint64, offset uint64
 			binary.LittleEndian.PutUint64(data[pos+8:pos+16], entry.DataBID)
 			binary.LittleEndian.PutUint64(data[pos+16:pos+24], entry.SubBID)
 		} else {
-			binary.LittleEndian.PutUint32(data[pos:pos+4], uint32(entry.NID))
-			binary.LittleEndian.PutUint32(data[pos+4:pos+8], uint32(entry.DataBID))
-			binary.LittleEndian.PutUint32(data[pos+8:pos+12], uint32(entry.SubBID))
+			// ANSI format uses 32-bit values per MS-PST spec
+			binary.LittleEndian.PutUint32(data[pos:pos+4], uint32(entry.NID))       //nolint:gosec // G115
+			binary.LittleEndian.PutUint32(data[pos+4:pos+8], uint32(entry.DataBID)) //nolint:gosec // G115
+			binary.LittleEndian.PutUint32(data[pos+8:pos+12], uint32(entry.SubBID)) //nolint:gosec // G115
 		}
 		pos += entrySize
 	}
@@ -212,7 +213,7 @@ func BuildSubnodeNonleafBlock(entries []SubnodeNonleafEntry, level byte, bid uin
 	data := make([]byte, dataSize)
 	data[0] = byte(BlockTypeSubnode)
 	data[1] = level
-	binary.LittleEndian.PutUint16(data[2:4], uint16(len(entries)))
+	binary.LittleEndian.PutUint16(data[2:4], uint16(len(entries))) //nolint:gosec // G115: entry count bounded by block capacity
 
 	// Write entries
 	pos := headerSize
@@ -221,8 +222,9 @@ func BuildSubnodeNonleafBlock(entries []SubnodeNonleafEntry, level byte, bid uin
 			binary.LittleEndian.PutUint64(data[pos:pos+8], entry.Key)
 			binary.LittleEndian.PutUint64(data[pos+8:pos+16], entry.SubBID)
 		} else {
-			binary.LittleEndian.PutUint32(data[pos:pos+4], uint32(entry.Key))
-			binary.LittleEndian.PutUint32(data[pos+4:pos+8], uint32(entry.SubBID))
+			// ANSI format uses 32-bit values per MS-PST spec
+			binary.LittleEndian.PutUint32(data[pos:pos+4], uint32(entry.Key))      //nolint:gosec // G115
+			binary.LittleEndian.PutUint32(data[pos+4:pos+8], uint32(entry.SubBID)) //nolint:gosec // G115
 		}
 		pos += entrySize
 	}

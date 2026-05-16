@@ -2,6 +2,8 @@ package disk
 
 // Permute tables for the permutative cipher (MS-PST 5.1).
 // table1 is used for encryption, table3 is used for decryption.
+//
+//nolint:dupl // Fixed lookup tables with algorithm-specific values
 var table1 = [256]byte{
 	65, 54, 19, 98, 168, 33, 110, 187,
 	244, 22, 204, 4, 127, 100, 232, 93,
@@ -37,6 +39,7 @@ var table1 = [256]byte{
 	13, 254, 186, 47, 181, 208, 218, 61,
 }
 
+//nolint:dupl // Fixed lookup tables with algorithm-specific values
 var table2 = [256]byte{
 	20, 83, 15, 86, 179, 200, 122, 156,
 	235, 101, 72, 23, 22, 21, 159, 2,
@@ -72,6 +75,7 @@ var table2 = [256]byte{
 	233, 249, 245, 255, 250, 251, 252, 254,
 }
 
+//nolint:dupl // Fixed lookup tables with algorithm-specific values
 var table3 = [256]byte{
 	71, 241, 180, 230, 11, 106, 114, 72,
 	133, 78, 158, 235, 226, 248, 148, 83,
@@ -136,6 +140,8 @@ func PermuteDecodeInPlace(data []byte) {
 
 // CyclicEncode encodes data using the cyclic cipher (MS-PST 5.2).
 // The key is typically derived from the block ID.
+//
+//nolint:gosec // G115: Cyclic cipher algorithm intentionally uses byte-level operations
 func CyclicEncode(data []byte, key uint32) []byte {
 	result := make([]byte, len(data))
 	w := uint16(key ^ (key >> 16))
@@ -157,6 +163,8 @@ func CyclicEncode(data []byte, key uint32) []byte {
 
 // CyclicDecode decodes data using the cyclic cipher.
 // The key is typically derived from the block ID.
+//
+//nolint:gosec // G115: Cyclic cipher algorithm intentionally uses byte-level operations
 func CyclicDecode(data []byte, key uint32) []byte {
 	result := make([]byte, len(data))
 	w := uint16(key ^ (key >> 16))
@@ -177,6 +185,8 @@ func CyclicDecode(data []byte, key uint32) []byte {
 }
 
 // CyclicDecodeInPlace decodes data in place using the cyclic cipher.
+//
+//nolint:gosec // G115: Cyclic cipher algorithm intentionally uses byte-level operations
 func CyclicDecodeInPlace(data []byte, key uint32) {
 	w := uint16(key ^ (key >> 16))
 
@@ -203,7 +213,7 @@ func DecryptBlock(data []byte, method CryptMethod, blockID uint64) []byte {
 		return PermuteDecode(data)
 	case CryptMethodCyclic:
 		// Key is the lower 32 bits of the block ID
-		key := uint32(blockID)
+		key := uint32(blockID) //nolint:gosec // G115: cyclic key uses lower 32 bits by design
 		return CyclicDecode(data, key)
 	default:
 		return data
@@ -218,12 +228,14 @@ func DecryptBlockInPlace(data []byte, method CryptMethod, blockID uint64) {
 	case CryptMethodPermute:
 		PermuteDecodeInPlace(data)
 	case CryptMethodCyclic:
-		key := uint32(blockID)
+		key := uint32(blockID) //nolint:gosec // G115: cyclic key uses lower 32 bits by design
 		CyclicDecodeInPlace(data, key)
 	}
 }
 
 // CRC32 table for PST CRC calculation (MS-PST 5.3).
+//
+//nolint:dupl // Fixed lookup tables with algorithm-specific values
 var crcTable = [256]uint32{
 	0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA,
 	0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
@@ -304,5 +316,5 @@ func ComputeCRC(data []byte) uint32 {
 // The signature is computed from the ID and address.
 func ComputeSignature[T uint32 | uint64](id T, address T) uint16 {
 	value := address ^ id
-	return uint16(uint16(value>>16) ^ uint16(value))
+	return uint16(value>>16) ^ uint16(value)
 }

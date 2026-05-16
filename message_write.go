@@ -24,18 +24,18 @@ const (
 
 // MessageBuilder provides a fluent interface for building messages.
 type MessageBuilder struct {
-	ctx        *WriteContext
-	folder     *Folder
-	subject    string
-	body       string
-	htmlBody   string
-	rtfBody    []byte
-	sentTime   time.Time
-	fromName   string
-	fromEmail  string
-	recipients []recipientInfo
+	ctx         *WriteContext
+	folder      *Folder
+	subject     string
+	body        string
+	htmlBody    string
+	rtfBody     []byte
+	sentTime    time.Time
+	fromName    string
+	fromEmail   string
+	recipients  []recipientInfo
 	attachments []attachmentInfo
-	properties map[ltp.PropID]interface{}
+	properties  map[ltp.PropID]interface{}
 }
 
 // recipientInfo holds recipient information.
@@ -48,10 +48,10 @@ type recipientInfo struct {
 
 // attachmentInfo holds attachment information.
 type attachmentInfo struct {
-	filename    string
-	mimeType    string
-	data        []byte
-	method      AttachMethod
+	filename string
+	mimeType string
+	data     []byte
+	method   AttachMethod
 }
 
 // NewMessageBuilder creates a new message builder.
@@ -303,7 +303,7 @@ func (b *MessageBuilder) Build() (*Message, error) {
 			_ = attachmentTable.SetRowInt32(rowID, ltp.PidTagAttachNumber, int32(i))
 			_ = attachmentTable.SetRowInt32(rowID, ltp.PidTagAttachMethod, int32(a.method))
 			_ = attachmentTable.SetRowString(rowID, ltp.PidTagAttachFilename, a.filename)
-			_ = attachmentTable.SetRowInt32(rowID, ltp.PidTagAttachSize, int32(len(a.data)))
+			_ = attachmentTable.SetRowInt32(rowID, ltp.PidTagAttachSize, int32(len(a.data))) //nolint:gosec // G115: attachment size bounded by available memory
 			_ = attachmentTable.SetRowString(rowID, ltp.PidTagAttachMimeTag, a.mimeType)
 
 			// Create attachment node with data
@@ -313,7 +313,7 @@ func (b *MessageBuilder) Build() (*Message, error) {
 			_ = attachBag.SetInt32(ltp.PidTagAttachMethod, int32(a.method))
 			_ = attachBag.SetString(ltp.PidTagAttachFilename, a.filename)
 			_ = attachBag.SetBinary(ltp.PidTagAttachDataBinary, a.data)
-			_ = attachBag.SetInt32(ltp.PidTagAttachSize, int32(len(a.data)))
+			_ = attachBag.SetInt32(ltp.PidTagAttachSize, int32(len(a.data))) //nolint:gosec // G115: attachment size bounded by available memory
 			_ = attachBag.SetString(ltp.PidTagAttachMimeTag, a.mimeType)
 
 			attachData, err := attachBag.Build()
@@ -422,7 +422,7 @@ func CopyMessage(ctx *WriteContext, msg *Message, destFolder *Folder) error {
 		name, _ := recip.Name()
 		email, _ := recip.Email()
 		rtype, _ := recip.Type()
-		builder.AddRecipient(name, email, RecipientType(rtype))
+		builder.AddRecipient(name, email, rtype)
 	}
 
 	// Copy attachments

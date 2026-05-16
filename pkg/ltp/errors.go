@@ -32,12 +32,12 @@ const (
 	ErrKindPropertyTypeMismatch // Property type doesn't match request
 
 	// Table Context errors (Section 2.3.4)
-	ErrKindInvalidTCSignature   // Invalid TC signature
-	ErrKindInvalidRowIndex      // Row index out of bounds
-	ErrKindInvalidColumnIndex   // Column index out of bounds
-	ErrKindInvalidColumnType    // Invalid column type
-	ErrKindMissingRowMatrix     // Row matrix not found
-	ErrKindTableCorrupted       // Table structure is corrupted
+	ErrKindInvalidTCSignature // Invalid TC signature
+	ErrKindInvalidRowIndex    // Row index out of bounds
+	ErrKindInvalidColumnIndex // Column index out of bounds
+	ErrKindInvalidColumnType  // Invalid column type
+	ErrKindMissingRowMatrix   // Row matrix not found
+	ErrKindTableCorrupted     // Table structure is corrupted
 )
 
 // String returns the string representation of the error kind.
@@ -146,11 +146,11 @@ func (e *LTPError) Is(target error) bool {
 
 // Sentinel errors for common cases.
 var (
-	ErrPropertyNotFound       = &LTPError{Kind: ErrKindPropertyNotFound}
-	ErrInvalidHeapSignature   = &LTPError{Kind: ErrKindInvalidHeapSignature}
-	ErrInvalidPCSignature     = &LTPError{Kind: ErrKindInvalidPCSignature}
-	ErrInvalidTCSignature     = &LTPError{Kind: ErrKindInvalidTCSignature}
-	ErrPropertyTypeMismatch   = &LTPError{Kind: ErrKindPropertyTypeMismatch}
+	ErrPropertyNotFound     = &LTPError{Kind: ErrKindPropertyNotFound}
+	ErrInvalidHeapSignature = &LTPError{Kind: ErrKindInvalidHeapSignature}
+	ErrInvalidPCSignature   = &LTPError{Kind: ErrKindInvalidPCSignature}
+	ErrInvalidTCSignature   = &LTPError{Kind: ErrKindInvalidTCSignature}
+	ErrPropertyTypeMismatch = &LTPError{Kind: ErrKindPropertyTypeMismatch}
 )
 
 // IsPropertyNotFound returns true if the error is a property not found error.

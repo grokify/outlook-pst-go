@@ -135,14 +135,14 @@ func (t *WriteTransaction) WriteBlockData(data []byte) (util.BlockID, error) {
 		bid:    bid,
 		offset: offset,
 		data:   data,
-		size:   uint16(len(data)),
+		size:   uint16(len(data)), //nolint:gosec // G115: block size bounded by MaxBlockSize
 	})
 
 	// Queue BBT entry
 	if err := t.btwriter.InsertBlock(&BlockInfo{
 		BID:      bid,
 		Location: offset,
-		Size:     uint16(len(data)),
+		Size:     uint16(len(data)), //nolint:gosec // G115: block size bounded by MaxBlockSize
 		RefCount: 1,
 	}); err != nil {
 		return 0, err
@@ -201,7 +201,7 @@ func (t *WriteTransaction) WriteExtendedBlockData(data []byte) (util.BlockID, er
 		return 0, err
 	}
 
-	xblockData, err := disk.BuildExtendedBlock(1, dataBlockBIDs, uint32(len(data)), uint64(xblockBID), xblockOffset, t.db.Format())
+	xblockData, err := disk.BuildExtendedBlock(1, dataBlockBIDs, uint32(len(data)), uint64(xblockBID), xblockOffset, t.db.Format()) //nolint:gosec // G115: len(data) bounded by caller
 	if err != nil {
 		return 0, err
 	}
@@ -210,13 +210,13 @@ func (t *WriteTransaction) WriteExtendedBlockData(data []byte) (util.BlockID, er
 		bid:    xblockBID,
 		offset: xblockOffset,
 		data:   xblockData,
-		size:   uint16(len(xblockData)),
+		size:   uint16(len(xblockData)), //nolint:gosec // G115: xblock size bounded
 	})
 
 	if err := t.btwriter.InsertBlock(&BlockInfo{
 		BID:      xblockBID,
 		Location: xblockOffset,
-		Size:     uint16(8 + len(dataBlockBIDs)*8),
+		Size:     uint16(8 + len(dataBlockBIDs)*8), //nolint:gosec // G115: xblock header size bounded
 		RefCount: 1,
 	}); err != nil {
 		return 0, err

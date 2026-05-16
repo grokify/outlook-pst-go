@@ -49,7 +49,7 @@ func BuildPage(data []byte, pageType PageType, bid uint64, offset uint64, format
 		binary.LittleEndian.PutUint64(trailer[8:16], bid)
 	} else {
 		// ANSI: wSig(2) + bid(4) + dwCRC(4)
-		binary.LittleEndian.PutUint32(trailer[4:8], uint32(bid))
+		binary.LittleEndian.PutUint32(trailer[4:8], uint32(bid)) //nolint:gosec // G115: ANSI BID is 32-bit
 		binary.LittleEndian.PutUint32(trailer[8:12], crc)
 	}
 
@@ -107,10 +107,10 @@ func BuildBTPage(page *BTPage, format PSTFormat) ([]byte, error) {
 		maxEntries = 255
 	}
 
-	data[headerOffset] = byte(numEntries)     // cEnt
-	data[headerOffset+1] = byte(maxEntries)   // cEntMax
-	data[headerOffset+2] = byte(entrySize)    // cbEnt
-	data[headerOffset+3] = byte(page.Level)   // cLevel
+	data[headerOffset] = byte(numEntries)   //nolint:gosec // G115: bounded by max 255
+	data[headerOffset+1] = byte(maxEntries) //nolint:gosec // G115: bounded by max 255
+	data[headerOffset+2] = byte(entrySize)  //nolint:gosec // G115: entry size is small constant
+	data[headerOffset+3] = byte(page.Level) //nolint:gosec // G115: B-tree level bounded by depth limit
 
 	// Build complete page with trailer
 	return BuildPage(data, page.Trailer.PageType, page.Trailer.BID, page.Trailer.BID, format)
@@ -144,9 +144,9 @@ func serializeNBTLeafEntries(entries []NBTLeafEntry, format PSTFormat) ([]byte, 
 			// bidData: 4-8 (4 bytes)
 			// bidSub: 8-12 (4 bytes)
 			// nidParent: 12-16 (4 bytes)
-			binary.LittleEndian.PutUint32(data[offset:offset+4], uint32(entry.NID))
-			binary.LittleEndian.PutUint32(data[offset+4:offset+8], uint32(entry.DataBID))
-			binary.LittleEndian.PutUint32(data[offset+8:offset+12], uint32(entry.SubBID))
+			binary.LittleEndian.PutUint32(data[offset:offset+4], uint32(entry.NID))       //nolint:gosec // G115: ANSI NID is 32-bit
+			binary.LittleEndian.PutUint32(data[offset+4:offset+8], uint32(entry.DataBID)) //nolint:gosec // G115: ANSI BID is 32-bit
+			binary.LittleEndian.PutUint32(data[offset+8:offset+12], uint32(entry.SubBID)) //nolint:gosec // G115: ANSI BID is 32-bit
 			binary.LittleEndian.PutUint32(data[offset+12:offset+16], entry.ParentNID)
 		}
 	}
@@ -182,8 +182,8 @@ func serializeBBTLeafEntries(entries []BBTLeafEntry, format PSTFormat) ([]byte, 
 			// bref.ib: 4-8 (4 bytes)
 			// cb: 8-10 (2 bytes)
 			// cRef: 10-12 (2 bytes)
-			binary.LittleEndian.PutUint32(data[offset:offset+4], uint32(entry.BRef.BID))
-			binary.LittleEndian.PutUint32(data[offset+4:offset+8], uint32(entry.BRef.IB))
+			binary.LittleEndian.PutUint32(data[offset:offset+4], uint32(entry.BRef.BID))  //nolint:gosec // G115: ANSI BID is 32-bit
+			binary.LittleEndian.PutUint32(data[offset+4:offset+8], uint32(entry.BRef.IB)) //nolint:gosec // G115: ANSI offset is 32-bit
 			binary.LittleEndian.PutUint16(data[offset+8:offset+10], entry.Size)
 			binary.LittleEndian.PutUint16(data[offset+10:offset+12], entry.RefCount)
 		}
@@ -216,9 +216,9 @@ func serializeNonleafEntries(entries []BTNonleafEntry, format PSTFormat) ([]byte
 			// key: 0-4 (4 bytes)
 			// bref.bid: 4-8 (4 bytes)
 			// bref.ib: 8-12 (4 bytes)
-			binary.LittleEndian.PutUint32(data[offset:offset+4], uint32(entry.Key))
-			binary.LittleEndian.PutUint32(data[offset+4:offset+8], uint32(entry.Ref.BID))
-			binary.LittleEndian.PutUint32(data[offset+8:offset+12], uint32(entry.Ref.IB))
+			binary.LittleEndian.PutUint32(data[offset:offset+4], uint32(entry.Key))       //nolint:gosec // G115: ANSI key is 32-bit
+			binary.LittleEndian.PutUint32(data[offset+4:offset+8], uint32(entry.Ref.BID)) //nolint:gosec // G115: ANSI BID is 32-bit
+			binary.LittleEndian.PutUint32(data[offset+8:offset+12], uint32(entry.Ref.IB)) //nolint:gosec // G115: ANSI offset is 32-bit
 		}
 	}
 
@@ -266,7 +266,7 @@ func NewBTNonleafPage(entries []BTNonleafEntry, level int, pageType PageType, bi
 			BID:            bid,
 		},
 		Header: BTPageHeader{
-			Level: byte(level),
+			Level: byte(level), //nolint:gosec // G115: B-tree level bounded by depth limit
 		},
 		Level:          level,
 		NonleafEntries: entries,
@@ -298,8 +298,8 @@ func BuildDListPage(entries []DListEntry, bid uint64, offset uint64, format PSTF
 	}
 
 	data := make([]byte, PageSize-trailerSize)
-	data[0] = 0                     // bFlags
-	data[1] = byte(len(entries))    // cEntDList
+	data[0] = 0                  // bFlags
+	data[1] = byte(len(entries)) //nolint:gosec // G115: entry count bounded by DList capacity
 
 	// Write entries
 	pos := headerSize

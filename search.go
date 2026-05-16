@@ -62,11 +62,11 @@ type SearchCriteria struct {
 
 // Search criteria property IDs.
 const (
-	PidTagSearchFolderRestriction   ltp.PropID = 0x6842 // Search restriction
-	PidTagSearchFolderEntryIdList   ltp.PropID = 0x6843 // List of folder entry IDs
-	PidTagSearchFolderFlags         ltp.PropID = 0x6848 // Search flags
-	PidTagSearchFolderLastUsed      ltp.PropID = 0x6834 // Last used time
-	PidTagSearchFolderTemplateId    ltp.PropID = 0x6841 // Template ID
+	PidTagSearchFolderRestriction ltp.PropID = 0x6842 // Search restriction
+	PidTagSearchFolderEntryIdList ltp.PropID = 0x6843 // List of folder entry IDs
+	PidTagSearchFolderFlags       ltp.PropID = 0x6848 // Search flags
+	PidTagSearchFolderLastUsed    ltp.PropID = 0x6834 // Last used time
+	PidTagSearchFolderTemplateId  ltp.PropID = 0x6841 // Template ID
 )
 
 // Search folder flags.
@@ -99,7 +99,7 @@ func newSearchCriteria(node *ndb.Node) (*SearchCriteria, error) {
 	// Read flags
 	flags, err := bag.GetInt32(PidTagSearchFolderFlags)
 	if err == nil {
-		sc.SearchFlags = uint32(flags)
+		sc.SearchFlags = uint32(flags) //nolint:gosec // G115: signed/unsigned reinterpretation of same bit width
 	}
 
 	return sc, nil

@@ -33,15 +33,15 @@ type Root struct {
 // The header structure differs between ANSI (512 bytes) and Unicode (568 bytes) formats.
 type Header struct {
 	// Common fields - See [MS-PST] Section 2.2.2.6
-	DWMagic         uint32      // dwMagic - Magic number (should be PSTMagic "!BDN")
-	DWCRCPartial    uint32      // dwCRCPartial - Partial header CRC
-	WMagicClient    uint16      // wMagicClient - Client magic (PST "SM" or OST "SO")
-	WVer            uint16      // wVer - Database format version (14-15=ANSI, 20-23=Unicode)
-	WVerClient      uint16      // wVerClient - Client version
-	BPlatformCreate byte        // bPlatformCreate - Platform created on (1=Win32)
-	BPlatformAccess byte        // bPlatformAccess - Platform accessed from
-	DWOpenDBID      uint32      // dwOpenDBID - Open database ID (reserved)
-	DWOpenClaimID   uint32      // dwOpenClaimID - Open claim ID (reserved)
+	DWMagic         uint32 // dwMagic - Magic number (should be PSTMagic "!BDN")
+	DWCRCPartial    uint32 // dwCRCPartial - Partial header CRC
+	WMagicClient    uint16 // wMagicClient - Client magic (PST "SM" or OST "SO")
+	WVer            uint16 // wVer - Database format version (14-15=ANSI, 20-23=Unicode)
+	WVerClient      uint16 // wVerClient - Client version
+	BPlatformCreate byte   // bPlatformCreate - Platform created on (1=Win32)
+	BPlatformAccess byte   // bPlatformAccess - Platform accessed from
+	DWOpenDBID      uint32 // dwOpenDBID - Open database ID (reserved)
+	DWOpenClaimID   uint32 // dwOpenClaimID - Open claim ID (reserved)
 
 	// Format-specific (derived from wVer)
 	Format PSTFormat // ANSI or Unicode

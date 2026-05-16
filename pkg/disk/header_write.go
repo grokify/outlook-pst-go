@@ -88,9 +88,9 @@ func SerializeHeaderANSI(h *Header) ([]byte, error) {
 	binary.LittleEndian.PutUint32(buf[20:24], h.DWOpenClaimID)
 
 	// bidNextB: 24-28 (4 bytes) - in ANSI, this comes earlier
-	binary.LittleEndian.PutUint32(buf[24:28], uint32(h.BidNextB))
+	binary.LittleEndian.PutUint32(buf[24:28], uint32(h.BidNextB)) //nolint:gosec // G115: ANSI BID is 32-bit
 	// bidNextP: 28-32 (4 bytes)
-	binary.LittleEndian.PutUint32(buf[28:32], uint32(h.BidNextP))
+	binary.LittleEndian.PutUint32(buf[28:32], uint32(h.BidNextP)) //nolint:gosec // G115: ANSI BID is 32-bit
 	// dwUnique: 32-36 (4 bytes)
 	binary.LittleEndian.PutUint32(buf[32:36], h.DWUnique)
 
@@ -153,19 +153,19 @@ func serializeRootANSI(buf []byte, r *Root) {
 	// cOrphans: 0-4 (4 bytes)
 	binary.LittleEndian.PutUint32(buf[0:4], r.COrphans)
 	// ibFileEOF: 4-8 (4 bytes)
-	binary.LittleEndian.PutUint32(buf[4:8], uint32(r.IBFileEOF))
+	binary.LittleEndian.PutUint32(buf[4:8], uint32(r.IBFileEOF)) //nolint:gosec // G115: ANSI file size is 32-bit
 	// ibAMapLast: 8-12 (4 bytes)
-	binary.LittleEndian.PutUint32(buf[8:12], uint32(r.IBAMapLast))
+	binary.LittleEndian.PutUint32(buf[8:12], uint32(r.IBAMapLast)) //nolint:gosec // G115: ANSI offset is 32-bit
 	// cbAMapFree: 12-16 (4 bytes)
-	binary.LittleEndian.PutUint32(buf[12:16], uint32(r.CBAMapFree))
+	binary.LittleEndian.PutUint32(buf[12:16], uint32(r.CBAMapFree)) //nolint:gosec // G115: ANSI size is 32-bit
 	// cbPMapFree: 16-20 (4 bytes)
-	binary.LittleEndian.PutUint32(buf[16:20], uint32(r.CBPMapFree))
+	binary.LittleEndian.PutUint32(buf[16:20], uint32(r.CBPMapFree)) //nolint:gosec // G115: ANSI size is 32-bit
 	// brefNBT: 20-28 (8 bytes) - bid(4) + ib(4)
-	binary.LittleEndian.PutUint32(buf[20:24], uint32(r.BRefNBT.BID))
-	binary.LittleEndian.PutUint32(buf[24:28], uint32(r.BRefNBT.IB))
+	binary.LittleEndian.PutUint32(buf[20:24], uint32(r.BRefNBT.BID)) //nolint:gosec // G115: ANSI BID is 32-bit
+	binary.LittleEndian.PutUint32(buf[24:28], uint32(r.BRefNBT.IB))  //nolint:gosec // G115: ANSI offset is 32-bit
 	// brefBBT: 28-36 (8 bytes)
-	binary.LittleEndian.PutUint32(buf[28:32], uint32(r.BRefBBT.BID))
-	binary.LittleEndian.PutUint32(buf[32:36], uint32(r.BRefBBT.IB))
+	binary.LittleEndian.PutUint32(buf[28:32], uint32(r.BRefBBT.BID)) //nolint:gosec // G115: ANSI BID is 32-bit
+	binary.LittleEndian.PutUint32(buf[32:36], uint32(r.BRefBBT.IB))  //nolint:gosec // G115: ANSI offset is 32-bit
 	// fAMapValid: 36 (1 byte)
 	buf[36] = r.FAMapValid
 	// bARVec: 37 (1 byte)

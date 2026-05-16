@@ -94,73 +94,73 @@ func (pt PropType) IsFixedSize() bool {
 // These are the most commonly used properties for messages, folders, attachments, and recipients.
 const (
 	// Message properties - See [MS-OXPROPS] for canonical definitions
-	PidTagSubject PropID = 0x0037
-	PidTagSubjectPrefix          PropID = 0x003D
-	PidTagNormalizedSubject      PropID = 0x0E1D
-	PidTagBody                   PropID = 0x1000
-	PidTagHtmlBody               PropID = 0x1013
-	PidTagRtfCompressed          PropID = 0x1009
-	PidTagImportance             PropID = 0x0017
-	PidTagPriority               PropID = 0x0026
-	PidTagSensitivity            PropID = 0x0036
-	PidTagMessageClass           PropID = 0x001A
-	PidTagMessageFlags           PropID = 0x0E07
-	PidTagMessageSize            PropID = 0x0E08
-	PidTagMessageStatus          PropID = 0x0E17
-	PidTagHasAttachments         PropID = 0x0E1B
-	PidTagCreationTime           PropID = 0x3007
-	PidTagLastModificationTime   PropID = 0x3008
-	PidTagMessageDeliveryTime    PropID = 0x0E06
-	PidTagClientSubmitTime       PropID = 0x0039
-	PidTagSentRepresentingName   PropID = 0x0042
+	PidTagSubject                      PropID = 0x0037
+	PidTagSubjectPrefix                PropID = 0x003D
+	PidTagNormalizedSubject            PropID = 0x0E1D
+	PidTagBody                         PropID = 0x1000
+	PidTagHtmlBody                     PropID = 0x1013
+	PidTagRtfCompressed                PropID = 0x1009
+	PidTagImportance                   PropID = 0x0017
+	PidTagPriority                     PropID = 0x0026
+	PidTagSensitivity                  PropID = 0x0036
+	PidTagMessageClass                 PropID = 0x001A
+	PidTagMessageFlags                 PropID = 0x0E07
+	PidTagMessageSize                  PropID = 0x0E08
+	PidTagMessageStatus                PropID = 0x0E17
+	PidTagHasAttachments               PropID = 0x0E1B
+	PidTagCreationTime                 PropID = 0x3007
+	PidTagLastModificationTime         PropID = 0x3008
+	PidTagMessageDeliveryTime          PropID = 0x0E06
+	PidTagClientSubmitTime             PropID = 0x0039
+	PidTagSentRepresentingName         PropID = 0x0042
 	PidTagSentRepresentingEmailAddress PropID = 0x0065
-	PidTagSenderName             PropID = 0x0C1A
-	PidTagSenderEmailAddress     PropID = 0x0C1F
-	PidTagSenderAddressType      PropID = 0x0C1E
-	PidTagDisplayTo              PropID = 0x0E04
-	PidTagDisplayCc              PropID = 0x0E03
-	PidTagDisplayBcc             PropID = 0x0E02
-	PidTagConversationTopic      PropID = 0x0070
-	PidTagConversationIndex      PropID = 0x0071
-	PidTagInternetMessageId      PropID = 0x1035
+	PidTagSenderName                   PropID = 0x0C1A
+	PidTagSenderEmailAddress           PropID = 0x0C1F
+	PidTagSenderAddressType            PropID = 0x0C1E
+	PidTagDisplayTo                    PropID = 0x0E04
+	PidTagDisplayCc                    PropID = 0x0E03
+	PidTagDisplayBcc                   PropID = 0x0E02
+	PidTagConversationTopic            PropID = 0x0070
+	PidTagConversationIndex            PropID = 0x0071
+	PidTagInternetMessageId            PropID = 0x1035
 
 	// Folder properties
-	PidTagDisplayName            PropID = 0x3001
-	PidTagContentCount           PropID = 0x3602
-	PidTagContentUnreadCount     PropID = 0x3603
-	PidTagSubfolders             PropID = 0x360A
-	PidTagContainerClass         PropID = 0x3613
-	PidTagFolderType             PropID = 0x3601
-	PidTagDepth                  PropID = 0x3005
+	PidTagDisplayName        PropID = 0x3001
+	PidTagContentCount       PropID = 0x3602
+	PidTagContentUnreadCount PropID = 0x3603
+	PidTagSubfolders         PropID = 0x360A
+	PidTagContainerClass     PropID = 0x3613
+	PidTagFolderType         PropID = 0x3601
+	PidTagDepth              PropID = 0x3005
 
 	// Attachment properties
-	PidTagAttachFilename         PropID = 0x3704
-	PidTagAttachLongFilename     PropID = 0x3707
-	PidTagAttachExtension        PropID = 0x3703
-	PidTagAttachSize             PropID = 0x0E20
-	PidTagAttachMethod           PropID = 0x3705
-	PidTagAttachDataBinary       PropID = 0x3701
-	PidTagAttachDataObject       PropID = 0x3701 // Same as binary
-	PidTagAttachMimeTag          PropID = 0x370E
-	PidTagAttachContentId        PropID = 0x3712
-	PidTagAttachNumber           PropID = 0x0E21
-	PidTagRenderingPosition      PropID = 0x370B
+	PidTagAttachFilename     PropID = 0x3704
+	PidTagAttachLongFilename PropID = 0x3707
+	PidTagAttachExtension    PropID = 0x3703
+	PidTagAttachSize         PropID = 0x0E20
+	PidTagAttachMethod       PropID = 0x3705
+	PidTagAttachDataBinary   PropID = 0x3701
+	PidTagAttachDataObject   PropID = 0x3701 // Same as binary
+	PidTagAttachMimeTag      PropID = 0x370E
+	PidTagAttachContentId    PropID = 0x3712
+	PidTagAttachNumber       PropID = 0x0E21
+	PidTagRenderingPosition  PropID = 0x370B
 
 	// Recipient properties
-	PidTagRecipientType          PropID = 0x0C15
-	PidTagEmailAddress           PropID = 0x3003
-	PidTagSmtpAddress            PropID = 0x39FE
-	PidTagAddressType            PropID = 0x3002
-	PidTagRecipientDisplayName   PropID = 0x5FF6
+	PidTagRecipientType        PropID = 0x0C15
+	PidTagEmailAddress         PropID = 0x3003
+	PidTagSmtpAddress          PropID = 0x39FE
+	PidTagAddressType          PropID = 0x3002
+	PidTagRecipientDisplayName PropID = 0x5FF6
 
 	// Table row properties
-	PidTagRowId                  PropID = 0x3000
-	PidTagLtpRowId               PropID = 0x67F2
-	PidTagLtpRowVer              PropID = 0x67F3
+	PidTagRowId     PropID = 0x3000
+	PidTagLtpRowId  PropID = 0x67F2
+	PidTagLtpRowVer PropID = 0x67F3
 
 	// Named property range
-	NamedPropertyRangeStart      PropID = 0x8000
-	NamedPropertyRangeEnd        PropID = 0xFFFE
+	NamedPropertyRangeStart PropID = 0x8000
+	NamedPropertyRangeEnd   PropID = 0xFFFE
 )
 
 // String returns a string representation of the property ID.
@@ -201,12 +201,12 @@ const (
 
 // Attachment methods.
 const (
-	AttachMethodNone      = 0
-	AttachMethodByValue   = 1
-	AttachMethodByRef     = 2
-	AttachMethodByRefRes  = 4
-	AttachMethodEmbedded  = 5 // Embedded message
-	AttachMethodOLE       = 6
+	AttachMethodNone     = 0
+	AttachMethodByValue  = 1
+	AttachMethodByRef    = 2
+	AttachMethodByRefRes = 4
+	AttachMethodEmbedded = 5 // Embedded message
+	AttachMethodOLE      = 6
 )
 
 // FileTimeToTime converts a Windows FILETIME to time.Time.
@@ -223,7 +223,7 @@ func FileTimeToTime(ft uint64) time.Time {
 	}
 
 	// Convert to Unix nanoseconds
-	unixNano := (int64(ft) - filetimeEpochDiff) * 100
+	unixNano := (int64(ft) - filetimeEpochDiff) * 100 //nolint:gosec // G115: FILETIME reinterpretation
 	return time.Unix(0, unixNano).UTC()
 }
 

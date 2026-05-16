@@ -11,12 +11,12 @@ import (
 // TableWriter builds a Table Context structure for writing.
 // See [MS-PST] Section 2.3.4 for the Table Context specification.
 type TableWriter struct {
-	heap       *HeapWriter
-	rowBTH     *BTHWriter
-	format     disk.PSTFormat
-	columns    []ColumnDef
-	rows       []*tableRow
-	nextRowID  uint32
+	heap      *HeapWriter
+	rowBTH    *BTHWriter
+	format    disk.PSTFormat
+	columns   []ColumnDef
+	rows      []*tableRow
+	nextRowID uint32
 }
 
 // ColumnDef defines a column in the table.
@@ -87,14 +87,14 @@ func (w *TableWriter) SetRowValue(rowID uint32, propID PropID, value []byte) err
 // SetRowInt32 sets an int32 value in a row.
 func (w *TableWriter) SetRowInt32(rowID uint32, propID PropID, value int32) error {
 	data := make([]byte, 4)
-	binary.LittleEndian.PutUint32(data, uint32(value))
+	binary.LittleEndian.PutUint32(data, uint32(value)) //nolint:gosec // G115: signed/unsigned reinterpretation
 	return w.SetRowValue(rowID, propID, data)
 }
 
 // SetRowInt64 sets an int64 value in a row.
 func (w *TableWriter) SetRowInt64(rowID uint32, propID PropID, value int64) error {
 	data := make([]byte, 8)
-	binary.LittleEndian.PutUint64(data, uint64(value))
+	binary.LittleEndian.PutUint64(data, uint64(value)) //nolint:gosec // G115: signed/unsigned reinterpretation
 	return w.SetRowValue(rowID, propID, data)
 }
 
@@ -232,7 +232,7 @@ func (w *TableWriter) calculateColumnOffsets() {
 		if w.columns[i].Size == 0 {
 			w.columns[i].Size = 4 // HNID for variable columns
 		}
-		offset += uint16(w.columns[i].Size)
+		offset += uint16(w.columns[i].Size) //nolint:gosec // G115: column size bounded
 	}
 }
 
@@ -260,14 +260,14 @@ func (w *TableWriter) buildColumnDescriptors() []byte {
 		binary.LittleEndian.PutUint16(data[offset:offset+2], uint16(col.PropType))
 		binary.LittleEndian.PutUint16(data[offset+2:offset+4], uint16(col.PropID))
 		binary.LittleEndian.PutUint16(data[offset+4:offset+6], col.Offset)
-		data[offset+6] = byte(col.Size)
-		data[offset+7] = byte(i) // iBit
+		data[offset+6] = byte(col.Size) //nolint:gosec // G115: column size bounded by row size
+		data[offset+7] = byte(i)        // iBit
 	}
 	return data
 }
 
 // buildTCInfo builds the TCINFO header structure.
-func (w *TableWriter) buildTCInfo(colDescHID, rowBTHHID util.HeapID, rowMatrixHNID util.HeapNodeID, rowSize int) []byte {
+func (w *TableWriter) buildTCInfo(_ /* colDescHID */, rowBTHHID util.HeapID, rowMatrixHNID util.HeapNodeID, rowSize int) []byte {
 	// TCINFO structure - See [MS-PST] Section 2.3.4.1
 	// bType: 1 byte (0x7C for TC)
 	// cCols: 1 byte (column count)
@@ -277,15 +277,15 @@ func (w *TableWriter) buildTCInfo(colDescHID, rowBTHHID util.HeapID, rowMatrixHN
 	// hidIndex: 4 bytes (deprecated, 0)
 
 	data := make([]byte, 22)
-	data[0] = disk.HeapSigTC // 0x7C
-	data[1] = byte(len(w.columns))
+	data[0] = disk.HeapSigTC       // 0x7C
+	data[1] = byte(len(w.columns)) //nolint:gosec // G115: column count bounded by table capacity
 
 	// rgib offsets - simplified: all columns at same boundary
 	rowSizeWithBitmap := rowSize
-	binary.LittleEndian.PutUint16(data[2:4], 0)                    // TCI_4b
-	binary.LittleEndian.PutUint16(data[4:6], uint16(rowSizeWithBitmap)) // TCI_2b
-	binary.LittleEndian.PutUint16(data[6:8], uint16(rowSizeWithBitmap)) // TCI_1b
-	binary.LittleEndian.PutUint16(data[8:10], uint16(rowSizeWithBitmap)) // TCI_bm
+	binary.LittleEndian.PutUint16(data[2:4], 0)                          // TCI_4b
+	binary.LittleEndian.PutUint16(data[4:6], uint16(rowSizeWithBitmap))  //nolint:gosec // G115: row size bounded by heap
+	binary.LittleEndian.PutUint16(data[6:8], uint16(rowSizeWithBitmap))  //nolint:gosec // G115: row size bounded by heap
+	binary.LittleEndian.PutUint16(data[8:10], uint16(rowSizeWithBitmap)) //nolint:gosec // G115: row size bounded by heap
 
 	binary.LittleEndian.PutUint32(data[10:14], uint32(rowBTHHID))
 	binary.LittleEndian.PutUint32(data[14:18], uint32(rowMatrixHNID))

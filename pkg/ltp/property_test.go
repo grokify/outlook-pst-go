@@ -90,9 +90,9 @@ func TestPropIDIsNamedProperty(t *testing.T) {
 	}{
 		{PidTagSubject, false},
 		{PidTagBody, false},
-		{0x8000, true},  // Start of named range
+		{0x8000, true}, // Start of named range
 		{0x8001, true},
-		{0xFFFE, true},  // End of named range
+		{0xFFFE, true}, // End of named range
 		{0x7FFF, false},
 		{0xFFFF, false}, // Above named range
 	}

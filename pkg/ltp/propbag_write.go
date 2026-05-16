@@ -23,7 +23,7 @@ type PropertyBagWriter struct {
 // propertyData holds property information during building.
 type propertyData struct {
 	propType PropType
-	value    []byte    // For fixed-size: the value; for variable: the data
+	value    []byte      // For fixed-size: the value; for variable: the data
 	hid      util.HeapID // HID for variable-size data
 }
 
@@ -43,14 +43,14 @@ func NewPropertyBagWriter(format disk.PSTFormat) *PropertyBagWriter {
 // SetInt16 sets an int16 property.
 func (w *PropertyBagWriter) SetInt16(id PropID, value int16) error {
 	data := make([]byte, 2)
-	binary.LittleEndian.PutUint16(data, uint16(value))
+	binary.LittleEndian.PutUint16(data, uint16(value)) //nolint:gosec // G115: signed/unsigned reinterpretation, same bit width
 	return w.setFixedProperty(id, PropTypeInt16, data)
 }
 
 // SetInt32 sets an int32 property.
 func (w *PropertyBagWriter) SetInt32(id PropID, value int32) error {
 	data := make([]byte, 4)
-	binary.LittleEndian.PutUint32(data, uint32(value))
+	binary.LittleEndian.PutUint32(data, uint32(value)) //nolint:gosec // G115: signed/unsigned reinterpretation, same bit width
 	return w.setFixedProperty(id, PropTypeInt32, data)
 }
 
@@ -58,7 +58,7 @@ func (w *PropertyBagWriter) SetInt32(id PropID, value int32) error {
 func (w *PropertyBagWriter) SetInt64(id PropID, value int64) error {
 	// Int64 is variable-size in PC (stored as HID reference)
 	data := make([]byte, 8)
-	binary.LittleEndian.PutUint64(data, uint64(value))
+	binary.LittleEndian.PutUint64(data, uint64(value)) //nolint:gosec // G115: signed/unsigned reinterpretation, same bit width
 	return w.setVariableProperty(id, PropTypeInt64, data)
 }
 

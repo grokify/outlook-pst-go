@@ -11,11 +11,11 @@ import (
 // HeapWriter manages heap allocations within a node.
 // It builds a Heap-on-Node (HN) structure for property storage.
 type HeapWriter struct {
-	clientSig     byte   // Client signature (PC=0xBC, TC=0x7C, BTH=0xB5)
-	rootHID       util.HeapID
-	allocations   []heapAllocation
-	nextAllocID   uint16
-	format        disk.PSTFormat
+	clientSig   byte // Client signature (PC=0xBC, TC=0x7C, BTH=0xB5)
+	rootHID     util.HeapID
+	allocations []heapAllocation
+	nextAllocID uint16
+	format      disk.PSTFormat
 }
 
 // heapAllocation represents a single heap allocation.
@@ -61,7 +61,7 @@ func (w *HeapWriter) SetRoot(hid util.HeapID) {
 // Returns the complete heap block data ready for writing.
 func (w *HeapWriter) Build() ([]byte, error) {
 	// Calculate total size needed
-	headerSize := 12 // HNHDR size
+	headerSize := 12                            // HNHDR size
 	pageMapSize := 2 + len(w.allocations)*2 + 2 // cAlloc(2) + offsets + end marker
 
 	// Calculate data size
@@ -113,7 +113,7 @@ func (w *HeapWriter) Build() ([]byte, error) {
 	// Write page map
 	// cAlloc: number of allocations
 	// rgibAlloc: array of offsets
-	binary.LittleEndian.PutUint16(buf[pageMapOffset:pageMapOffset+2], uint16(len(w.allocations)))
+	binary.LittleEndian.PutUint16(buf[pageMapOffset:pageMapOffset+2], uint16(len(w.allocations))) //nolint:gosec // G115: allocations bounded by heap capacity
 	for i, off := range offsets {
 		binary.LittleEndian.PutUint16(buf[pageMapOffset+2+i*2:], off)
 	}

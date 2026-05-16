@@ -9,10 +9,10 @@ import (
 func TestParseHeader(t *testing.T) {
 	// Create a valid header
 	data := make([]byte, 16)
-	binary.LittleEndian.PutUint32(data[0:4], 100)             // CompSize
-	binary.LittleEndian.PutUint32(data[4:8], 50)              // RawSize
+	binary.LittleEndian.PutUint32(data[0:4], 100)              // CompSize
+	binary.LittleEndian.PutUint32(data[4:8], 50)               // RawSize
 	binary.LittleEndian.PutUint32(data[8:12], MagicCompressed) // CompType
-	binary.LittleEndian.PutUint32(data[12:16], 0x12345678)    // CRC
+	binary.LittleEndian.PutUint32(data[12:16], 0x12345678)     // CRC
 
 	header, err := ParseHeader(data)
 	if err != nil {
@@ -69,10 +69,10 @@ func TestDecompressUncompressed(t *testing.T) {
 	rtfContent := []byte("{\\rtf1 Hello World}")
 
 	data := make([]byte, 16+len(rtfContent))
-	binary.LittleEndian.PutUint32(data[0:4], uint32(len(data)-4)) // CompSize
-	binary.LittleEndian.PutUint32(data[4:8], uint32(len(rtfContent))) // RawSize
-	binary.LittleEndian.PutUint32(data[8:12], MagicUncompressed) // CompType
-	binary.LittleEndian.PutUint32(data[12:16], 0) // CRC
+	binary.LittleEndian.PutUint32(data[0:4], uint32(len(data)-4))     //nolint:gosec // G115: test data size
+	binary.LittleEndian.PutUint32(data[4:8], uint32(len(rtfContent))) //nolint:gosec // G115: test data size
+	binary.LittleEndian.PutUint32(data[8:12], MagicUncompressed)      // CompType
+	binary.LittleEndian.PutUint32(data[12:16], 0)                     // CRC
 	copy(data[16:], rtfContent)
 
 	result, err := Decompress(data)

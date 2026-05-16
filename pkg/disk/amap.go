@@ -12,23 +12,23 @@ import (
 // See [MS-PST] Section 2.2.2.7.2 - AMAPPAGE structure.
 // Each AMap page tracks 253952 bytes (496 slots * 512 bytes/slot).
 type AMapPage struct {
-	Offset    uint64           // File offset of this AMap page
-	BitMap    [496]byte        // Allocation bitmap (496 bytes = 3968 bits)
-	Trailer   PageTrailer      // Page trailer
-	FreeSlots int              // Count of free 64-byte slots in this page's range
+	Offset    uint64      // File offset of this AMap page
+	BitMap    [496]byte   // Allocation bitmap (496 bytes = 3968 bits)
+	Trailer   PageTrailer // Page trailer
+	FreeSlots int         // Count of free 64-byte slots in this page's range
 	format    PSTFormat
 }
 
 // AMapManager manages allocation map pages for a PST file.
 // It tracks free space and allocates/frees blocks.
 type AMapManager struct {
-	pages       []*AMapPage
-	format      PSTFormat
-	fileSize    uint64
-	freeBytes   uint64 // Total free space in bytes
+	pages     []*AMapPage
+	format    PSTFormat
+	fileSize  uint64
+	freeBytes uint64 // Total free space in bytes
 
 	// File reference for reading/writing
-	reader      io.ReaderAt
+	reader io.ReaderAt
 
 	// Pending allocations (not yet written to disk)
 	pendingAllocs []allocation
@@ -75,7 +75,7 @@ func (m *AMapManager) loadAMapPages(h *Header) error {
 		// Calculate next AMap page offset
 		// AMaps are spaced at bytesPerAMap intervals after accounting for header
 		offset += bytesPerAMap
-		if offset == FirstAMapPageLocation + bytesPerAMap {
+		if offset == FirstAMapPageLocation+bytesPerAMap {
 			// First interval needs to account for initial file structures
 			offset = FirstAMapPageLocation + bytesPerAMap
 		}
@@ -90,7 +90,7 @@ func (m *AMapManager) loadAMapPages(h *Header) error {
 // readAMapPage reads an AMap page from the file.
 func (m *AMapManager) readAMapPage(offset uint64) (*AMapPage, error) {
 	buf := make([]byte, PageSize)
-	n, err := m.reader.ReadAt(buf, int64(offset))
+	n, err := m.reader.ReadAt(buf, int64(offset)) //nolint:gosec // G115: PST file size bounded by format (max ~50GB)
 	if err != nil && err != io.EOF {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func (p *AMapPage) countFreeSlots() {
 func (m *AMapManager) calculateFreeSpace() {
 	m.freeBytes = 0
 	for _, page := range m.pages {
-		m.freeBytes += uint64(page.FreeSlots) * BytesPerSlot
+		m.freeBytes += uint64(page.FreeSlots) * BytesPerSlot //nolint:gosec // G115: FreeSlots bounded by AMap page size
 	}
 }
 
@@ -170,7 +170,7 @@ func (m *AMapManager) Allocate(size uint64) (uint64, error) {
 
 	// Align size to 64-byte boundary
 	alignedSize := AlignDisk(size)
-	slotsNeeded := int(alignedSize / BytesPerSlot)
+	slotsNeeded := int(alignedSize / BytesPerSlot) //nolint:gosec // G115: slot count bounded by AMap page structure
 
 	// Try to find contiguous free space in existing pages
 	for _, page := range m.pages {
@@ -253,7 +253,7 @@ func (p *AMapPage) markAllocated(offset uint64, slots int) {
 		baseOffset = FirstAMapPageLocation + PageSize
 	}
 
-	startSlot := int((offset - baseOffset) / BytesPerSlot)
+	startSlot := int((offset - baseOffset) / BytesPerSlot) //nolint:gosec // G115: slot index bounded by AMap page bitmap
 
 	for i := 0; i < slots; i++ {
 		slotIdx := startSlot + i
@@ -269,7 +269,7 @@ func (p *AMapPage) markAllocated(offset uint64, slots int) {
 // Free frees previously allocated space.
 func (m *AMapManager) Free(offset, size uint64) error {
 	alignedSize := AlignDisk(size)
-	slotsToFree := int(alignedSize / BytesPerSlot)
+	slotsToFree := int(alignedSize / BytesPerSlot) //nolint:gosec // G115: slot count bounded by AMap page structure
 
 	// Find the AMap page that covers this offset
 	page := m.findPageForOffset(offset)
@@ -309,7 +309,7 @@ func (p *AMapPage) markFree(offset uint64, slots int) {
 		baseOffset = FirstAMapPageLocation + PageSize
 	}
 
-	startSlot := int((offset - baseOffset) / BytesPerSlot)
+	startSlot := int((offset - baseOffset) / BytesPerSlot) //nolint:gosec // G115: slot index bounded by AMap page bitmap
 
 	for i := 0; i < slots; i++ {
 		slotIdx := startSlot + i
@@ -347,7 +347,7 @@ func (m *AMapManager) RebuildFromBTrees(allocatedBlocks []BlockAllocation) error
 		}
 
 		alignedSize := AlignDisk(uint64(block.Size))
-		slots := int(alignedSize / BytesPerSlot)
+		slots := int(alignedSize / BytesPerSlot) //nolint:gosec // G115: slot count bounded by block size limit
 		page.markAllocated(block.Offset, slots)
 	}
 
@@ -394,7 +394,7 @@ func (p *AMapPage) Serialize() ([]byte, error) {
 		binary.LittleEndian.PutUint32(trailer[4:8], crc)
 		binary.LittleEndian.PutUint64(trailer[8:16], p.Trailer.BID)
 	} else {
-		binary.LittleEndian.PutUint32(trailer[4:8], uint32(p.Trailer.BID))
+		binary.LittleEndian.PutUint32(trailer[4:8], uint32(p.Trailer.BID)) //nolint:gosec // G115: ANSI format BID is 32-bit per MS-PST spec
 		binary.LittleEndian.PutUint32(trailer[8:12], crc)
 	}
 

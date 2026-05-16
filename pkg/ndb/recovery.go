@@ -142,7 +142,7 @@ func collectAllocatedBlocks(db *Database, page *disk.BTPage) ([]disk.BlockAlloca
 			diskSize := disk.CalculateBlockDiskSize(uint64(entry.Size), db.Format())
 			allocs = append(allocs, disk.BlockAllocation{
 				Offset: entry.BRef.IB,
-				Size:   uint16(diskSize),
+				Size:   uint16(diskSize), //nolint:gosec // G115: disk size bounded by block limit
 			})
 		}
 		return allocs, nil

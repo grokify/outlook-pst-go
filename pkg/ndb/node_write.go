@@ -162,14 +162,14 @@ func (b *SubnodeBuilder) Build() (util.BlockID, error) {
 		bid:    bid,
 		offset: offset,
 		data:   blockData,
-		size:   uint16(len(blockData)),
+		size:   uint16(len(blockData)), //nolint:gosec // G115: block size bounded by MaxBlockSize
 	})
 
 	// Register in BBT
 	if err := b.txn.btwriter.InsertBlock(&BlockInfo{
 		BID:      bid,
 		Location: offset,
-		Size:     uint16(dataSize),
+		Size:     uint16(dataSize), //nolint:gosec // G115: data size bounded by MaxDataSize
 		RefCount: 1,
 	}); err != nil {
 		return 0, err

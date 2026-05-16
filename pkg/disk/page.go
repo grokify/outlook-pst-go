@@ -84,9 +84,9 @@ type BTNonleafEntry struct {
 
 // BTPage represents a parsed B-tree page.
 type BTPage struct {
-	Trailer    PageTrailer
-	Header     BTPageHeader
-	Level      int
+	Trailer PageTrailer
+	Header  BTPageHeader
+	Level   int
 
 	// For leaf pages
 	NBTEntries []NBTLeafEntry

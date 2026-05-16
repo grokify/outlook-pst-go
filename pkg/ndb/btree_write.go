@@ -140,7 +140,7 @@ func (w *BTWriter) applyNBTChanges() (*disk.BlockReference, error) {
 	// Apply deletes
 	filteredEntries := make([]disk.NBTLeafEntry, 0, len(entries))
 	for _, entry := range entries {
-		nid := util.NodeID(entry.NID)
+		nid := util.NodeID(entry.NID) //nolint:gosec // G115: NID is 32-bit per MS-PST spec
 		if !w.nbtDeletes[nid] {
 			filteredEntries = append(filteredEntries, entry)
 		}
@@ -228,7 +228,7 @@ func (w *BTWriter) createNBTLeafPage(entries []disk.NBTLeafEntry) (*disk.BlockRe
 	}
 
 	// Create page
-	bid := uint64(offset) // Use offset as BID for pages
+	bid := offset // Use offset as BID for pages
 	page := disk.NewNBTLeafPage(entries, bid, w.db.Format())
 
 	// Serialize and write
@@ -275,6 +275,8 @@ func (w *BTWriter) buildNBTTree(entries []disk.NBTLeafEntry, maxPerPage int) (*d
 }
 
 // buildNBTNonleafLevels builds non-leaf levels of the NBT.
+//
+//nolint:dupl // NBT and BBT non-leaf building have same structure but different page types
 func (w *BTWriter) buildNBTNonleafLevels(childRefs []disk.BlockReference, maxKeys []uint64, level int) (*disk.BlockReference, error) {
 	if len(childRefs) == 1 {
 		return &childRefs[0], nil
@@ -311,7 +313,7 @@ func (w *BTWriter) buildNBTNonleafLevels(childRefs []disk.BlockReference, maxKey
 			return nil, err
 		}
 
-		bid := uint64(offset)
+		bid := offset
 		page := disk.NewBTNonleafPage(entries, level, disk.PageTypeNBT, bid)
 
 		pageData, err := disk.BuildBTPage(page, format)
@@ -434,7 +436,7 @@ func (w *BTWriter) createBBTLeafPage(entries []disk.BBTLeafEntry) (*disk.BlockRe
 		return nil, err
 	}
 
-	bid := uint64(offset)
+	bid := offset
 	page := disk.NewBBTLeafPage(entries, bid, w.db.Format())
 
 	pageData, err := disk.BuildBTPage(page, w.db.Format())
@@ -478,6 +480,8 @@ func (w *BTWriter) buildBBTTree(entries []disk.BBTLeafEntry, maxPerPage int) (*d
 }
 
 // buildBBTNonleafLevels builds non-leaf levels of the BBT.
+//
+//nolint:dupl // NBT and BBT non-leaf building have same structure but different page types
 func (w *BTWriter) buildBBTNonleafLevels(childRefs []disk.BlockReference, maxKeys []uint64, level int) (*disk.BlockReference, error) {
 	if len(childRefs) == 1 {
 		return &childRefs[0], nil
@@ -511,7 +515,7 @@ func (w *BTWriter) buildBBTNonleafLevels(childRefs []disk.BlockReference, maxKey
 			return nil, err
 		}
 
-		bid := uint64(offset)
+		bid := offset
 		page := disk.NewBTNonleafPage(entries, level, disk.PageTypeBBT, bid)
 
 		pageData, err := disk.BuildBTPage(page, format)

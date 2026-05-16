@@ -82,7 +82,7 @@ func initializePSTStructure(f *os.File, header *disk.Header, opts CreateOptions)
 
 	// Write initial AMap page (at 0x4400)
 	amapPage := amap.PendingAllocations() // Get initial AMap state
-	_ = amapPage // AMap written through manager
+	_ = amapPage                          // AMap written through manager
 
 	// Create minimal B-tree structure
 	// We need at least:
@@ -136,7 +136,7 @@ func initializePSTStructure(f *os.File, header *disk.Header, opts CreateOptions)
 	if err != nil {
 		return fmt.Errorf("failed to build store block: %w", err)
 	}
-	if _, err := f.WriteAt(storeBlock, int64(storeBlockOffset)); err != nil {
+	if _, err := f.WriteAt(storeBlock, int64(storeBlockOffset)); err != nil { //nolint:gosec // G115: offset bounded by file size
 		return fmt.Errorf("failed to write store block: %w", err)
 	}
 
@@ -144,7 +144,7 @@ func initializePSTStructure(f *os.File, header *disk.Header, opts CreateOptions)
 	if err != nil {
 		return fmt.Errorf("failed to build root block: %w", err)
 	}
-	if _, err := f.WriteAt(rootBlock, int64(rootBlockOffset)); err != nil {
+	if _, err := f.WriteAt(rootBlock, int64(rootBlockOffset)); err != nil { //nolint:gosec // G115: offset bounded by file size
 		return fmt.Errorf("failed to write root block: %w", err)
 	}
 
@@ -168,12 +168,12 @@ func initializePSTStructure(f *os.File, header *disk.Header, opts CreateOptions)
 	bbtEntries := []disk.BBTLeafEntry{
 		{
 			BRef:     disk.BlockReference{BID: storeBID, IB: storeBlockOffset},
-			Size:     uint16(len(storeData)),
+			Size:     uint16(len(storeData)), //nolint:gosec // G115: store data size bounded
 			RefCount: 1,
 		},
 		{
 			BRef:     disk.BlockReference{BID: rootBID, IB: rootBlockOffset},
-			Size:     uint16(len(rootData)),
+			Size:     uint16(len(rootData)), //nolint:gosec // G115: root data size bounded
 			RefCount: 1,
 		},
 	}
@@ -188,7 +188,7 @@ func initializePSTStructure(f *os.File, header *disk.Header, opts CreateOptions)
 	if err != nil {
 		return fmt.Errorf("failed to build NBT page: %w", err)
 	}
-	if _, err := f.WriteAt(nbtPageData, int64(nbtPageOffset)); err != nil {
+	if _, err := f.WriteAt(nbtPageData, int64(nbtPageOffset)); err != nil { //nolint:gosec // G115: offset bounded by file size
 		return fmt.Errorf("failed to write NBT page: %w", err)
 	}
 
@@ -202,7 +202,7 @@ func initializePSTStructure(f *os.File, header *disk.Header, opts CreateOptions)
 	if err != nil {
 		return fmt.Errorf("failed to build BBT page: %w", err)
 	}
-	if _, err := f.WriteAt(bbtPageData, int64(bbtPageOffset)); err != nil {
+	if _, err := f.WriteAt(bbtPageData, int64(bbtPageOffset)); err != nil { //nolint:gosec // G115: offset bounded by file size
 		return fmt.Errorf("failed to write BBT page: %w", err)
 	}
 
@@ -398,6 +398,9 @@ func Compact(srcFilename, dstFilename string, opts CompactOptions) error {
 }
 
 // copyFolderContents recursively copies folder contents.
+// This is a best-effort operation that continues on individual item errors.
+//
+//nolint:unparam // Error return reserved for future use; currently always nil for best-effort semantics
 func copyFolderContents(ctx *WriteContext, src, dst *Folder, opts CompactOptions) error {
 	// Skip deleted items if requested
 	if opts.RemoveDeletedItems {

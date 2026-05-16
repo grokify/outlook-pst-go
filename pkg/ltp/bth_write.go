@@ -12,11 +12,11 @@ import (
 // BTHWriter builds a B-Tree on Heap structure.
 // See [MS-PST] Section 2.3.2 for the BTH specification.
 type BTHWriter struct {
-	heap      *HeapWriter
-	keySize   byte // Key size in bytes (2, 4, 8, or 16)
-	dataSize  byte // Data size in bytes
-	entries   []bthEntry
-	format    disk.PSTFormat
+	heap     *HeapWriter
+	keySize  byte // Key size in bytes (2, 4, 8, or 16)
+	dataSize byte // Data size in bytes
+	entries  []bthEntry
+	format   disk.PSTFormat
 }
 
 // bthEntry represents an entry in the BTH.
@@ -131,10 +131,10 @@ func (w *BTHWriter) createEmptyBTH() (util.HeapID, error) {
 	// BTH header (BTHHEADER) - 8 bytes
 	// See [MS-PST] Section 2.3.2.1
 	header := make([]byte, 8)
-	header[0] = 0xB5        // bType - BTH signature
-	header[1] = w.keySize   // cbKey
-	header[2] = w.dataSize  // cbEnt (data size)
-	header[3] = 0           // bIdxLevels (0 = leaf only)
+	header[0] = 0xB5       // bType - BTH signature
+	header[1] = w.keySize  // cbKey
+	header[2] = w.dataSize // cbEnt (data size)
+	header[3] = 0          // bIdxLevels (0 = leaf only)
 	// hidRoot: 4-8 (4 bytes) - 0 for empty BTH
 	binary.LittleEndian.PutUint32(header[4:8], 0)
 
@@ -167,10 +167,10 @@ func (w *BTHWriter) buildSingleLevel() (util.HeapID, error) {
 
 	// Build BTH header pointing to leaf
 	header := make([]byte, 8)
-	header[0] = 0xB5        // bType
-	header[1] = w.keySize   // cbKey
-	header[2] = w.dataSize  // cbEnt
-	header[3] = 0           // bIdxLevels (0 = leaf at root)
+	header[0] = 0xB5       // bType
+	header[1] = w.keySize  // cbKey
+	header[2] = w.dataSize // cbEnt
+	header[3] = 0          // bIdxLevels (0 = leaf at root)
 	binary.LittleEndian.PutUint32(header[4:8], uint32(leafHID))
 
 	headerHID, err := w.heap.Allocate(header)
@@ -226,7 +226,7 @@ func (w *BTHWriter) buildIntermediateLevel(childHIDs []util.HeapID, maxKeys [][]
 		header[0] = 0xB5
 		header[1] = w.keySize
 		header[2] = w.dataSize
-		header[3] = byte(level)
+		header[3] = byte(level) //nolint:gosec // G115: BTH level bounded by tree depth
 		binary.LittleEndian.PutUint32(header[4:8], uint32(childHIDs[0]))
 
 		headerHID, err := w.heap.Allocate(header)

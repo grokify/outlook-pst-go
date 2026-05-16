@@ -134,10 +134,10 @@ func (b BlockType) String() string {
 
 // Size constants.
 const (
-	PageSize           = 512  // All pages are 512 bytes
-	MaxBlockDiskSize   = 8192 // Maximum block size on disk (8KB)
-	BytesPerSlot       = 64   // Bytes per AMap slot
-	HeapMaxAllocSize   = 3580 // Maximum heap allocation size
+	PageSize            = 512  // All pages are 512 bytes
+	MaxBlockDiskSize    = 8192 // Maximum block size on disk (8KB)
+	BytesPerSlot        = 64   // Bytes per AMap slot
+	HeapMaxAllocSize    = 3580 // Maximum heap allocation size
 	HeapMaxAllocSizeV14 = 3068 // Maximum heap allocation size for ANSI v14
 )
 
@@ -155,9 +155,9 @@ const (
 
 // Trailer size constants.
 const (
-	PageTrailerSizeANSI    = 12 // ANSI page trailer size
-	PageTrailerSizeUnicode = 16 // Unicode page trailer size
-	BlockTrailerSizeANSI   = 12 // ANSI block trailer size
+	PageTrailerSizeANSI     = 12 // ANSI page trailer size
+	PageTrailerSizeUnicode  = 16 // Unicode page trailer size
+	BlockTrailerSizeANSI    = 12 // ANSI block trailer size
 	BlockTrailerSizeUnicode = 16 // Unicode block trailer size
 )
 
