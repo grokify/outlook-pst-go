@@ -84,6 +84,7 @@ nav:
       - MessageBuilder: api/message-builder.md
   - Reference:
       - Specifications: reference/specifications.md
+      - Implementation Case Study: CASE_STUDY_PORTING.md
   - Examples: examples.md
   - CLI Tool: cli.md
   - Releases:
