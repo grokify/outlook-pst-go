@@ -4,14 +4,14 @@ A pure Go library for reading and writing Microsoft Outlook PST (Personal Storag
 
 ## Features
 
-- **Read and write** PST and OST files
-- **Create new PST files** from scratch
-- **Transaction safety** with two-phase commit
-- **Both ANSI and Unicode** PST formats supported
-- **All encryption methods** (none, permute, cyclic)
-- **Pure Go** - no CGO dependencies
-- **Lazy loading** for efficient memory usage
-- **Go 1.23+ iterators** for idiomatic iteration
+- 📖 **Read and write** PST and OST files
+- ✨ **Create new PST files** from scratch
+- 🔒 **Transaction safety** with two-phase commit
+- 🌐 **Both ANSI and Unicode** PST formats supported
+- 🔐 **All encryption methods** (none, permute, cyclic)
+- 🐹 **Pure Go** - no CGO dependencies
+- ⚡ **Lazy loading** for efficient memory usage
+- 🔄 **Go 1.23+ iterators** for idiomatic iteration
 
 ## Installation
 
