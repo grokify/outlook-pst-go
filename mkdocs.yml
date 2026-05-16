@@ -1,0 +1,90 @@
+site_name: outlook-pst-go
+site_description: A pure Go library for reading and writing Microsoft Outlook PST files
+site_url: https://grokify.github.io/outlook-pst-go/
+repo_url: https://github.com/grokify/outlook-pst-go
+repo_name: grokify/outlook-pst-go
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quickstart.md
+  - User Guide:
+      - Reading:
+          - Opening PST Files: guide/opening-files.md
+          - Working with Folders: guide/folders.md
+          - Reading Messages: guide/messages.md
+          - Attachments: guide/attachments.md
+          - Recipients: guide/recipients.md
+          - RTF Message Bodies: guide/rtf-bodies.md
+          - Named Properties: guide/named-properties.md
+          - Search Folders: guide/search-folders.md
+      - Writing:
+          - Creating PST Files: guide/creating-pst-files.md
+          - Transactions: guide/transactions.md
+          - Creating Folders: guide/creating-folders.md
+          - Creating Messages: guide/creating-messages.md
+          - Modifying Content: guide/modifying-content.md
+      - Error Handling: guide/error-handling.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - Disk Layer: architecture/disk-layer.md
+      - NDB Layer: architecture/ndb-layer.md
+      - LTP Layer: architecture/ltp-layer.md
+      - PST Layer: architecture/pst-layer.md
+  - API Reference:
+      - PST: api/pst.md
+      - Folder: api/folder.md
+      - Message: api/message.md
+      - Attachment: api/attachment.md
+      - Recipient: api/recipient.md
+      - SearchFolder: api/search-folder.md
+      - NamedPropertyMap: api/named-property-map.md
+      - WriteContext: api/write-context.md
+      - MessageBuilder: api/message-builder.md
+  - Reference:
+      - Specifications: reference/specifications.md
+  - Examples: examples.md
+  - CLI Tool: cli.md
+  - Releases:
+      - v0.1.0: releases/v0.1.0.md
