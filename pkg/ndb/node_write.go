@@ -11,6 +11,7 @@ import (
 type NodeBuilder struct {
 	txn       *WriteTransaction
 	nidType   util.NIDType
+	nid       util.NodeID
 	parentNID util.NodeID
 	dataBID   util.BlockID
 	subBID    util.BlockID
@@ -23,6 +24,12 @@ func NewNodeBuilder(txn *WriteTransaction, nidType util.NIDType) *NodeBuilder {
 		txn:     txn,
 		nidType: nidType,
 	}
+}
+
+// WithNID sets an explicit node ID. Table nodes use the same nidIndex as their owner.
+func (b *NodeBuilder) WithNID(nid util.NodeID) *NodeBuilder {
+	b.nid = nid
+	return b
 }
 
 // WithParent sets the parent node ID.
@@ -70,6 +77,12 @@ func (b *NodeBuilder) Build() (*NodeInfo, error) {
 	}
 
 	// Create the node
+	if b.nid != 0 {
+		if b.nid.Type() != b.nidType {
+			return nil, fmt.Errorf("explicit NID type 0x%X does not match builder type 0x%X", b.nid.Type(), b.nidType)
+		}
+		return b.txn.CreateNodeWithID(b.nid, b.parentNID, b.dataBID, b.subBID)
+	}
 	return b.txn.CreateNode(b.nidType, b.parentNID, b.dataBID, b.subBID)
 }
 
@@ -88,6 +101,13 @@ func NewSubnodeBuilder(txn *WriteTransaction) *SubnodeBuilder {
 
 // AddSubnode adds a subnode entry.
 func (b *SubnodeBuilder) AddSubnode(nid util.NodeID, data []byte) error {
+	return b.AddSubnodeWithSubnodes(nid, data, 0)
+}
+
+// AddSubnodeWithSubnodes adds a subnode entry whose node may itself own a
+// subnode tree. This is used for objects such as attachments whose large
+// properties are stored indirectly beneath the attachment node.
+func (b *SubnodeBuilder) AddSubnodeWithSubnodes(nid util.NodeID, data []byte, subBID util.BlockID) error {
 	var dataBID util.BlockID
 	var err error
 
@@ -110,7 +130,7 @@ func (b *SubnodeBuilder) AddSubnode(nid util.NodeID, data []byte) error {
 	b.entries = append(b.entries, disk.SubnodeLeafEntry{
 		NID:     uint64(nid),
 		DataBID: uint64(dataBID),
-		SubBID:  0,
+		SubBID:  uint64(subBID),
 	})
 
 	return nil
@@ -157,12 +177,15 @@ func (b *SubnodeBuilder) Build() (util.BlockID, error) {
 		return 0, fmt.Errorf("failed to build subnode block: %w", err)
 	}
 
-	// Queue for writing
+	// Queue only the unaligned payload. Commit is responsible for adding
+	// alignment and the block trailer; queueing the already-built disk block
+	// here would add a second trailer and overrun the AMap allocation.
+	payload := append([]byte(nil), blockData[:dataSize]...)
 	b.txn.pendingBlocks = append(b.txn.pendingBlocks, pendingBlock{
 		bid:    bid,
 		offset: offset,
-		data:   blockData,
-		size:   uint16(len(blockData)), //nolint:gosec // G115: block size bounded by MaxBlockSize
+		data:   payload,
+		size:   uint16(dataSize), //nolint:gosec // G115: data size bounded by MaxDataSize
 	})
 
 	// Register in BBT
@@ -181,16 +204,21 @@ func (b *SubnodeBuilder) Build() (util.BlockID, error) {
 // UpdateNodeData updates the data block for an existing node.
 // This creates a new data block and updates the NBT entry.
 func UpdateNodeData(txn *WriteTransaction, nid util.NodeID, data []byte) error {
-	// Look up existing node
-	info, err := txn.db.LookupNode(nid)
-	if err != nil {
-		return fmt.Errorf("node not found: %w", err)
+	// Newly-created nodes are not visible through the on-disk NBT until commit.
+	// Prefer a pending insert when present so callers can build a folder and add
+	// messages to it in the same transaction.
+	info, pending := txn.btwriter.nbtInserts[nid]
+	var err error
+	if !pending {
+		info, err = txn.db.LookupNode(nid)
+		if err != nil {
+			return fmt.Errorf("node not found: %w", err)
+		}
 	}
 
-	// Delete old data block if present
-	if info.DataBID != 0 {
+	// Delete an old committed data block when replacing an existing node.
+	if !pending && info.DataBID != 0 {
 		if err := txn.DeleteBlock(info.DataBID); err != nil {
-			// Log but continue - orphan block is acceptable
 			_ = err
 		}
 	}
@@ -213,7 +241,13 @@ func UpdateNodeData(txn *WriteTransaction, nid util.NodeID, data []byte) error {
 		}
 	}
 
-	// Delete old NBT entry and insert updated one
+	if pending {
+		// nbtInserts stores the same *NodeInfo pointer, so updating it in place
+		// changes the queued NBT entry without attempting a duplicate insert.
+		info.DataBID = newBID
+		return nil
+	}
+
 	if err := txn.btwriter.DeleteNode(nid); err != nil {
 		return err
 	}
@@ -224,8 +258,67 @@ func UpdateNodeData(txn *WriteTransaction, nid util.NodeID, data []byte) error {
 		SubBID:    info.SubBID,
 		ParentNID: info.ParentNID,
 	}
-
 	return txn.btwriter.InsertNode(newInfo)
+}
+
+// UpdateNodeDataAndSubnodes replaces both the data and subnode blocks for a
+// node in one NBT update. It supports nodes created earlier in the same
+// transaction as well as committed nodes loaded from disk.
+func UpdateNodeDataAndSubnodes(txn *WriteTransaction, nid util.NodeID, data []byte, subBID util.BlockID) error {
+	info, pending := txn.btwriter.nbtInserts[nid]
+	var err error
+	if !pending {
+		info, err = txn.db.LookupNode(nid)
+		if err != nil {
+			return fmt.Errorf("node not found: %w", err)
+		}
+	}
+
+	var newDataBID util.BlockID
+	if len(data) > 0 {
+		maxSize := disk.MaxDataBlockSizeUnicode
+		if txn.db.Format() == disk.FormatANSI {
+			maxSize = disk.MaxDataBlockSizeANSI
+		}
+		if len(data) <= maxSize {
+			newDataBID, err = txn.WriteBlockData(data)
+		} else {
+			newDataBID, err = txn.WriteExtendedBlockData(data)
+		}
+		if err != nil {
+			return fmt.Errorf("failed to write new data: %w", err)
+		}
+	}
+
+	if pending {
+		// Mutate the queued NBT entry in place. Old same-transaction blocks may
+		// remain unreferenced in this transaction, but the committed NBT will
+		// point only at the final data/subnode pair.
+		info.DataBID = newDataBID
+		info.SubBID = subBID
+		return nil
+	}
+
+	if info.DataBID != 0 {
+		if err := txn.DeleteBlock(info.DataBID); err != nil {
+			_ = err
+		}
+	}
+	if info.SubBID != 0 {
+		if err := txn.DeleteBlock(info.SubBID); err != nil {
+			_ = err
+		}
+	}
+	if err := txn.btwriter.DeleteNode(nid); err != nil {
+		return err
+	}
+
+	return txn.btwriter.InsertNode(&NodeInfo{
+		NID:       nid,
+		DataBID:   newDataBID,
+		SubBID:    subBID,
+		ParentNID: info.ParentNID,
+	})
 }
 
 // UpdateNodeSubnodes updates the subnode block for an existing node.

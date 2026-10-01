@@ -206,6 +206,12 @@ func initializePSTStructure(f *os.File, header *disk.Header, opts CreateOptions)
 		return fmt.Errorf("failed to write BBT page: %w", err)
 	}
 
+	// Persist the final allocation map after all initial blocks/pages have
+	// been allocated. Reopening the PST must see those regions as occupied.
+	if err := amap.WritePages(f); err != nil {
+		return fmt.Errorf("failed to write allocation map: %w", err)
+	}
+
 	// Update header with B-tree roots
 	header.Root.BRefNBT = disk.BlockReference{BID: nbtPageOffset, IB: nbtPageOffset}
 	header.Root.BRefBBT = disk.BlockReference{BID: bbtPageOffset, IB: bbtPageOffset}
@@ -261,19 +267,57 @@ func (p *PST) BeginWrite() (*WriteContext, error) {
 		return nil, err
 	}
 	return &WriteContext{
-		pst: p,
-		txn: txn,
+		pst:          p,
+		txn:          txn,
+		tableWriters: make(map[util.NodeID]*ltp.TableWriter),
+		dirtyTables:  make(map[util.NodeID]struct{}),
 	}, nil
 }
 
 // WriteContext represents an active write transaction on a PST file.
 type WriteContext struct {
-	pst *PST
-	txn *ndb.WriteTransaction
+	pst          *PST
+	txn          *ndb.WriteTransaction
+	tableWriters map[util.NodeID]*ltp.TableWriter
+	dirtyTables  map[util.NodeID]struct{}
 }
 
-// Commit commits all changes in the transaction.
+func (w *WriteContext) markTableDirty(nid util.NodeID) {
+	if w.dirtyTables == nil {
+		w.dirtyTables = make(map[util.NodeID]struct{})
+	}
+	w.dirtyTables[nid] = struct{}{}
+}
+
+func (w *WriteContext) flushDirtyTables() error {
+	for nid := range w.dirtyTables {
+		writer := w.tableWriters[nid]
+		if writer == nil {
+			continue
+		}
+
+		subnodes := ndb.NewSubnodeBuilder(w.txn)
+		nextSubnodeIndex := uint32(1)
+		data, err := writer.BuildWithSubnodes(subnodes, &nextSubnodeIndex)
+		if err != nil {
+			return fmt.Errorf("failed to build table 0x%X: %w", nid, err)
+		}
+		subBID, err := subnodes.Build()
+		if err != nil {
+			return fmt.Errorf("failed to build table 0x%X subnodes: %w", nid, err)
+		}
+		if err := ndb.UpdateNodeDataAndSubnodes(w.txn, nid, data, subBID); err != nil {
+			return fmt.Errorf("failed to update table 0x%X: %w", nid, err)
+		}
+	}
+	return nil
+}
+
+// Commit flushes logical table changes and then commits the transaction.
 func (w *WriteContext) Commit() error {
+	if err := w.flushDirtyTables(); err != nil {
+		return err
+	}
 	return w.txn.Commit()
 }
 

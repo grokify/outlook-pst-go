@@ -49,10 +49,9 @@ func (w *BTWriter) InsertNode(info *NodeInfo) error {
 	if _, exists := w.nbtInserts[info.NID]; exists {
 		return fmt.Errorf("node 0x%X already queued for insertion", info.NID)
 	}
-	if w.nbtDeletes[info.NID] {
-		// Reinserting a deleted node
-		delete(w.nbtDeletes, info.NID)
-	}
+	// If this NID was deleted from the committed tree earlier in the
+	// transaction, keep the deletion marker. Apply() must remove the old
+	// on-disk entry before appending this replacement entry.
 	w.nbtInserts[info.NID] = info
 	return nil
 }
@@ -80,9 +79,9 @@ func (w *BTWriter) InsertBlock(info *BlockInfo) error {
 	if _, exists := w.bbtInserts[lookupBID]; exists {
 		return fmt.Errorf("block 0x%X already queued for insertion", info.BID)
 	}
-	if w.bbtDeletes[lookupBID] {
-		delete(w.bbtDeletes, lookupBID)
-	}
+	// Keep any deletion marker for the same committed BID key. This makes
+	// delete+insert a true replacement instead of leaving duplicate BBT
+	// entries behind.
 	w.bbtInserts[lookupBID] = info
 	return nil
 }
@@ -267,7 +266,7 @@ func (w *BTWriter) buildNBTTree(entries []disk.NBTLeafEntry, maxPerPage int) (*d
 			return nil, err
 		}
 		leafRefs = append(leafRefs, *ref)
-		leafMaxKeys = append(leafMaxKeys, pageEntries[len(pageEntries)-1].NID)
+		leafMaxKeys = append(leafMaxKeys, pageEntries[0].NID)
 	}
 
 	// Build non-leaf levels until we have a single root
@@ -326,7 +325,7 @@ func (w *BTWriter) buildNBTNonleafLevels(childRefs []disk.BlockReference, maxKey
 		}
 
 		parentRefs = append(parentRefs, disk.BlockReference{BID: bid, IB: offset})
-		parentMaxKeys = append(parentMaxKeys, maxKeys[end-1])
+		parentMaxKeys = append(parentMaxKeys, maxKeys[i])
 	}
 
 	return w.buildNBTNonleafLevels(parentRefs, parentMaxKeys, level+1)
@@ -371,9 +370,12 @@ func (w *BTWriter) applyBBTChanges() (*disk.BlockReference, error) {
 		filteredEntries = append(filteredEntries, entry)
 	}
 
-	// Sort by BID
+	// BBT lookups compare BIDs with the internal bit cleared, so both leaf
+	// ordering and non-leaf separator keys must use the same normalized key.
 	sort.Slice(filteredEntries, func(i, j int) bool {
-		return filteredEntries[i].BRef.BID < filteredEntries[j].BRef.BID
+		left := filteredEntries[i].BRef.BID &^ uint64(util.BlockIDInternalBit)
+		right := filteredEntries[j].BRef.BID &^ uint64(util.BlockIDInternalBit)
+		return left < right
 	})
 
 	// Rebuild tree structure
@@ -473,7 +475,7 @@ func (w *BTWriter) buildBBTTree(entries []disk.BBTLeafEntry, maxPerPage int) (*d
 			return nil, err
 		}
 		leafRefs = append(leafRefs, *ref)
-		leafMaxKeys = append(leafMaxKeys, pageEntries[len(pageEntries)-1].BRef.BID)
+		leafMaxKeys = append(leafMaxKeys, pageEntries[0].BRef.BID&^uint64(util.BlockIDInternalBit))
 	}
 
 	return w.buildBBTNonleafLevels(leafRefs, leafMaxKeys, 1)
@@ -528,7 +530,7 @@ func (w *BTWriter) buildBBTNonleafLevels(childRefs []disk.BlockReference, maxKey
 		}
 
 		parentRefs = append(parentRefs, disk.BlockReference{BID: bid, IB: offset})
-		parentMaxKeys = append(parentMaxKeys, maxKeys[end-1])
+		parentMaxKeys = append(parentMaxKeys, maxKeys[i])
 	}
 
 	return w.buildBBTNonleafLevels(parentRefs, parentMaxKeys, level+1)
